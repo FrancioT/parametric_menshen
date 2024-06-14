@@ -214,11 +214,13 @@ wire parser_m_axis_tlast [C_NUM_QUEUES-1:0];
 wire parser_m_axis_tvalid [C_NUM_QUEUES-1:0];
 
 wire pkt_fifo_rd_en [C_NUM_QUEUES-1:0];
-wire pkt_fifo_nearly_full [C_NUM_QUEUES-1:0];
+wire [C_NUM_QUEUES-1:0] pkt_fifo_nearly_full;
 wire pkt_fifo_empty [C_NUM_QUEUES-1:0];
 
-assign s_axis_tready_f = !pkt_fifo_nearly_full[0] && !pkt_fifo_nearly_full[1] &&
-			 !pkt_fifo_nearly_full[2] && !pkt_fifo_nearly_full[3];
+assign s_axis_tready_f = ~|pkt_fifo_nearly_full;
+// equivalent to the old:
+//assign s_axis_tready_f = !pkt_fifo_nearly_full[0] && !pkt_fifo_nearly_full[1] &&
+//			 !pkt_fifo_nearly_full[2] && !pkt_fifo_nearly_full[3];
 
 /*
 generate 
