@@ -10,8 +10,8 @@ module pkt_filter #(
 	parameter C_VLANID_WIDTH = 12
 )
 (
-	input				clk,
-	input				aresetn,
+	input			clk,
+	input			aresetn,
 
 	input [31:0]		vlan_drop_flags,
 	output [31:0]		ctrl_token,
@@ -19,29 +19,29 @@ module pkt_filter #(
 
 	// input Slave AXI Stream
 	input [C_S_AXIS_DATA_WIDTH-1:0]			s_axis_tdata,
-	input [((C_S_AXIS_DATA_WIDTH/8))-1:0]	s_axis_tkeep,
+	input [((C_S_AXIS_DATA_WIDTH/8))-1:0]		s_axis_tkeep,
 	input [C_S_AXIS_TUSER_WIDTH-1:0]		s_axis_tuser,
-	input									s_axis_tvalid,
-	output									s_axis_tready,
-	input									s_axis_tlast,
+	input						s_axis_tvalid,
+	output						s_axis_tready,
+	input						s_axis_tlast,
 
 	// output Master AXI Stream
 	output reg [C_S_AXIS_DATA_WIDTH-1:0]		m_axis_tdata,
 	output reg [((C_S_AXIS_DATA_WIDTH/8))-1:0]	m_axis_tkeep,
 	output reg [C_S_AXIS_TUSER_WIDTH-1:0]		m_axis_tuser,
-	output reg									m_axis_tvalid,
-	input										m_axis_tready,
-	output reg									m_axis_tlast,
+	output reg					m_axis_tvalid,
+	input						m_axis_tready,
+	output reg					m_axis_tlast,
 
-	output reg [C_VLANID_WIDTH-1:0]				vlan_id,
-	output reg									vlan_id_valid,
+	output reg [C_VLANID_WIDTH-1:0]			vlan_id,
+	output reg					vlan_id_valid,
 
 	//TODO a back-pressure is needed?
 	output reg [C_S_AXIS_DATA_WIDTH-1:0]		c_m_axis_tdata,
 	output reg [((C_S_AXIS_DATA_WIDTH/8))-1:0]	c_m_axis_tkeep,
 	output reg [C_S_AXIS_TUSER_WIDTH-1:0]		c_m_axis_tuser,
-	output reg									c_m_axis_tvalid,
-	output reg									c_m_axis_tlast
+	output reg					c_m_axis_tvalid,
+	output reg					c_m_axis_tlast
 
 );
 

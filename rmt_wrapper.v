@@ -3,40 +3,40 @@
 module rmt_wrapper #(
 	// AXI-Lite parameters
 	// Width of AXI lite data bus in bits
-    parameter AXIL_DATA_WIDTH = 32,
-    // Width of AXI lite address bus in bits
-    parameter AXIL_ADDR_WIDTH = 16,
-    // Width of AXI lite wstrb (width of data bus in words)
-    parameter AXIL_STRB_WIDTH = (AXIL_DATA_WIDTH/8),
+	parameter AXIL_DATA_WIDTH = 32,
+	// Width of AXI lite address bus in bits
+	parameter AXIL_ADDR_WIDTH = 16,
+	// Width of AXI lite wstrb (width of data bus in words)
+	parameter AXIL_STRB_WIDTH = (AXIL_DATA_WIDTH/8),
 	// AXI Stream parameters
 	// Slave
 	parameter C_S_AXIS_DATA_WIDTH = 512,
 	parameter C_S_AXIS_TUSER_WIDTH = 128,
 	// Master
 	// self-defined
-    parameter PHV_LEN = 48*8+32*8+16*8+256,
-    parameter KEY_LEN = 48*2+32*2+16*2+1,
-    parameter ACT_LEN = 25,
-    parameter KEY_OFF = 6*3+20,
+	parameter PHV_LEN = 48*8+32*8+16*8+256,
+	parameter KEY_LEN = 48*2+32*2+16*2+1,
+	parameter ACT_LEN = 25,
+	parameter KEY_OFF = 6*3+20,
 	parameter C_NUM_QUEUES = 4,
 	parameter C_VLANID_WIDTH = 12,
 	parameter C_FIFO_BIT_WIDTH = 4
 )
 (
-	input										clk,		// axis clk
-	input										aresetn,	
-	input [31:0]								vlan_drop_flags,
-	output [31:0]								ctrl_token,
+	input						clk,		// axis clk
+	input						aresetn,	
+	input [31:0]					vlan_drop_flags,
+	output [31:0]					ctrl_token,
 
 	/*
      * input Slave AXI Stream
      */
-	input [C_S_AXIS_DATA_WIDTH-1:0]				s_axis_tdata,
+	input [C_S_AXIS_DATA_WIDTH-1:0]			s_axis_tdata,
 	input [((C_S_AXIS_DATA_WIDTH/8))-1:0]		s_axis_tkeep,
-	input [C_S_AXIS_TUSER_WIDTH-1:0]			s_axis_tuser,
-	input										s_axis_tvalid,
-	output										s_axis_tready,
-	input										s_axis_tlast,
+	input [C_S_AXIS_TUSER_WIDTH-1:0]		s_axis_tuser,
+	input						s_axis_tvalid,
+	output						s_axis_tready,
+	input						s_axis_tlast,
 
 	/*
      * output Master AXI Stream
@@ -44,9 +44,9 @@ module rmt_wrapper #(
 	output     [C_S_AXIS_DATA_WIDTH-1:0]		m_axis_tdata,
 	output     [((C_S_AXIS_DATA_WIDTH/8))-1:0]	m_axis_tkeep,
 	output     [C_S_AXIS_TUSER_WIDTH-1:0]		m_axis_tuser,
-	output    									m_axis_tvalid,
-	input										m_axis_tready,
-	output  									m_axis_tlast
+	output    					m_axis_tvalid,
+	input						m_axis_tready,
+	output  					m_axis_tlast
 
 	
 );
@@ -56,64 +56,64 @@ integer idx;
 /*=================================================*/
 localparam PKT_VEC_WIDTH = (6+4+2)*8*8+256;
 
-wire								stg0_phv_in_valid;
-wire [PKT_VEC_WIDTH-1:0]			stg0_phv_in;
+wire stg0_phv_in_valid;
+wire [PKT_VEC_WIDTH-1:0] stg0_phv_in;
 // stage-related
-wire [PKT_VEC_WIDTH-1:0]			stg0_phv_out;
-wire								stg0_phv_out_valid;
-wire [PKT_VEC_WIDTH-1:0]			stg1_phv_out;
-wire								stg1_phv_out_valid;
-wire [PKT_VEC_WIDTH-1:0]			stg2_phv_out;
-wire								stg2_phv_out_valid;
-wire [PKT_VEC_WIDTH-1:0]			stg3_phv_out;
-wire								stg3_phv_out_valid;
-// wire [PKT_VEC_WIDTH-1:0]			stg4_phv_out;
-// wire								stg4_phv_out_valid;
+wire [PKT_VEC_WIDTH-1:0] stg0_phv_out;
+wire stg0_phv_out_valid;
+wire [PKT_VEC_WIDTH-1:0] stg1_phv_out;
+wire stg1_phv_out_valid;
+wire [PKT_VEC_WIDTH-1:0] stg2_phv_out;
+wire stg2_phv_out_valid;
+wire [PKT_VEC_WIDTH-1:0] stg3_phv_out;
+wire stg3_phv_out_valid;
+// wire [PKT_VEC_WIDTH-1:0] stg4_phv_out;
+// wire	stg4_phv_out_valid;
 
-reg [PKT_VEC_WIDTH-1:0]				stg0_phv_in_d1;
-reg [PKT_VEC_WIDTH-1:0]				stg0_phv_out_d1;
-reg [PKT_VEC_WIDTH-1:0]				stg1_phv_out_d1;
-reg [PKT_VEC_WIDTH-1:0]				stg2_phv_out_d1;
-reg [PKT_VEC_WIDTH-1:0]				stg3_phv_out_d1;
+reg [PKT_VEC_WIDTH-1:0]	stg0_phv_in_d1;
+reg [PKT_VEC_WIDTH-1:0]	stg0_phv_out_d1;
+reg [PKT_VEC_WIDTH-1:0]	stg1_phv_out_d1;
+reg [PKT_VEC_WIDTH-1:0] stg2_phv_out_d1;
+reg [PKT_VEC_WIDTH-1:0]	stg3_phv_out_d1;
 
-reg									stg0_phv_in_valid_d1;
-reg									stg0_phv_out_valid_d1;
-reg									stg1_phv_out_valid_d1;
-reg									stg2_phv_out_valid_d1;
-reg									stg3_phv_out_valid_d1;
+reg stg0_phv_in_valid_d1;
+reg stg0_phv_out_valid_d1;
+reg stg1_phv_out_valid_d1;
+reg stg2_phv_out_valid_d1;
+reg stg3_phv_out_valid_d1;
 
 
 //
-wire [C_VLANID_WIDTH-1:0]			stg0_vlan_in;
-wire								stg0_vlan_valid_in;
-reg [C_VLANID_WIDTH-1:0]			stg0_vlan_in_r;
-reg									stg0_vlan_valid_in_r;
+wire [C_VLANID_WIDTH-1:0] stg0_vlan_in;
+wire stg0_vlan_valid_in;
+reg [C_VLANID_WIDTH-1:0] stg0_vlan_in_r;
+reg stg0_vlan_valid_in_r;
 
-wire								stg0_vlan_ready;
-wire [C_VLANID_WIDTH-1:0]			stg0_vlan_out;
-wire								stg0_vlan_valid_out;
-reg [C_VLANID_WIDTH-1:0]			stg0_vlan_out_r;
-reg									stg0_vlan_valid_out_r;
+wire stg0_vlan_ready;
+wire [C_VLANID_WIDTH-1:0] stg0_vlan_out;
+wire stg0_vlan_valid_out;
+reg [C_VLANID_WIDTH-1:0] stg0_vlan_out_r;
+reg stg0_vlan_valid_out_r;
 
-wire								stg1_vlan_ready;
-wire [C_VLANID_WIDTH-1:0]			stg1_vlan_out;
-wire								stg1_vlan_valid_out;
-reg [C_VLANID_WIDTH-1:0]			stg1_vlan_out_r;
-reg									stg1_vlan_valid_out_r;
+wire stg1_vlan_ready;
+wire [C_VLANID_WIDTH-1:0] stg1_vlan_out;
+wire stg1_vlan_valid_out;
+reg [C_VLANID_WIDTH-1:0] stg1_vlan_out_r;
+reg stg1_vlan_valid_out_r;
 
-wire								stg2_vlan_ready;
-wire [C_VLANID_WIDTH-1:0]			stg2_vlan_out;
-wire								stg2_vlan_valid_out;
-reg [C_VLANID_WIDTH-1:0]			stg2_vlan_out_r;
-reg 								stg2_vlan_valid_out_r;
+wire stg2_vlan_ready;
+wire [C_VLANID_WIDTH-1:0] stg2_vlan_out;
+wire stg2_vlan_valid_out;
+reg [C_VLANID_WIDTH-1:0] stg2_vlan_out_r;
+reg stg2_vlan_valid_out_r;
 
-wire								stg3_vlan_ready;
-wire [C_VLANID_WIDTH-1:0]			stg3_vlan_out;
-wire								stg3_vlan_valid_out;
-reg [C_VLANID_WIDTH-1:0]			stg3_vlan_out_r;
-reg 								stg3_vlan_valid_out_r;
+wire stg3_vlan_ready;
+wire [C_VLANID_WIDTH-1:0] stg3_vlan_out;
+wire stg3_vlan_valid_out;
+reg [C_VLANID_WIDTH-1:0] stg3_vlan_out_r;
+reg stg3_vlan_valid_out_r;
 
-wire								last_stg_vlan_ready;
+wire last_stg_vlan_ready;
 
 // back pressure signals
 wire s_axis_tready_p;
@@ -126,39 +126,39 @@ wire last_stg_ready;
 
 /*=================================================*/
 
-wire [C_VLANID_WIDTH-1:0]					s_vlan_id;
-wire										s_vlan_id_valid;
+wire [C_VLANID_WIDTH-1:0] s_vlan_id;
+wire s_vlan_id_valid;
 
-reg [C_VLANID_WIDTH-1:0]					s_vlan_id_r;
-reg 										s_vlan_id_valid_r;
+reg [C_VLANID_WIDTH-1:0] s_vlan_id_r;
+reg s_vlan_id_valid_r;
 
 //NOTE: to filter out packets other than UDP/IP.
-wire [C_S_AXIS_DATA_WIDTH-1:0]				s_axis_tdata_f;
-wire [((C_S_AXIS_DATA_WIDTH/8))-1:0]		s_axis_tkeep_f;
-wire [C_S_AXIS_TUSER_WIDTH-1:0]				s_axis_tuser_f;
-wire										s_axis_tvalid_f;
-wire										s_axis_tready_f;
-wire										s_axis_tlast_f;
+wire [C_S_AXIS_DATA_WIDTH-1:0] s_axis_tdata_f;
+wire [((C_S_AXIS_DATA_WIDTH/8))-1:0] s_axis_tkeep_f;
+wire [C_S_AXIS_TUSER_WIDTH-1:0] s_axis_tuser_f;
+wire s_axis_tvalid_f;
+wire s_axis_tready_f;
+wire s_axis_tlast_f;
 
-reg [C_S_AXIS_DATA_WIDTH-1:0]			s_axis_tdata_f_reg;
-reg [((C_S_AXIS_DATA_WIDTH/8))-1:0]		s_axis_tkeep_f_reg;
-reg [C_S_AXIS_TUSER_WIDTH-1:0]			s_axis_tuser_f_reg;
-reg										s_axis_tvalid_f_reg;
-reg										s_axis_tlast_f_reg;
+reg [C_S_AXIS_DATA_WIDTH-1:0] s_axis_tdata_f_reg;
+reg [((C_S_AXIS_DATA_WIDTH/8))-1:0] s_axis_tkeep_f_reg;
+reg [C_S_AXIS_TUSER_WIDTH-1:0] s_axis_tuser_f_reg;
+reg s_axis_tvalid_f_reg;
+reg s_axis_tlast_f_reg;
 
 //NOTE: filter control packets from data packets.
-wire [C_S_AXIS_DATA_WIDTH-1:0]				ctrl_s_axis_tdata_1;
-wire [((C_S_AXIS_DATA_WIDTH/8))-1:0]		ctrl_s_axis_tkeep_1;
-wire [C_S_AXIS_TUSER_WIDTH-1:0]				ctrl_s_axis_tuser_1;
-wire										ctrl_s_axis_tvalid_1;
-wire										ctrl_s_axis_tready_1;
-wire										ctrl_s_axis_tlast_1;
+wire [C_S_AXIS_DATA_WIDTH-1:0] ctrl_s_axis_tdata_1;
+wire [((C_S_AXIS_DATA_WIDTH/8))-1:0] ctrl_s_axis_tkeep_1;
+wire [C_S_AXIS_TUSER_WIDTH-1:0] ctrl_s_axis_tuser_1;
+wire ctrl_s_axis_tvalid_1;
+wire ctrl_s_axis_tready_1;
+wire ctrl_s_axis_tlast_1;
 
-reg  [C_S_AXIS_DATA_WIDTH-1:0]				ctrl_s_axis_tdata_1_r;
-reg  [((C_S_AXIS_DATA_WIDTH/8))-1:0]		ctrl_s_axis_tkeep_1_r;
-reg  [C_S_AXIS_TUSER_WIDTH-1:0]				ctrl_s_axis_tuser_1_r;
-reg 										ctrl_s_axis_tvalid_1_r;
-reg 										ctrl_s_axis_tlast_1_r;
+reg  [C_S_AXIS_DATA_WIDTH-1:0] ctrl_s_axis_tdata_1_r;
+reg  [((C_S_AXIS_DATA_WIDTH/8))-1:0] ctrl_s_axis_tkeep_1_r;
+reg  [C_S_AXIS_TUSER_WIDTH-1:0] ctrl_s_axis_tuser_1_r;
+reg ctrl_s_axis_tvalid_1_r;
+reg ctrl_s_axis_tlast_1_r;
 
 pkt_filter #(
 	.C_S_AXIS_DATA_WIDTH(C_S_AXIS_DATA_WIDTH),
@@ -201,26 +201,24 @@ pkt_filter #(
 
 // we will have multiple pkt fifos and phv fifos
 // pkt fifo wires
-wire [C_S_AXIS_DATA_WIDTH-1:0]		pkt_fifo_tdata_out [C_NUM_QUEUES-1:0];
-wire [C_S_AXIS_TUSER_WIDTH-1:0]		pkt_fifo_tuser_out [C_NUM_QUEUES-1:0];
-wire [C_S_AXIS_DATA_WIDTH/8-1:0]	pkt_fifo_tkeep_out [C_NUM_QUEUES-1:0];
-wire [C_NUM_QUEUES-1:0]				pkt_fifo_tlast_out;
+wire [C_S_AXIS_DATA_WIDTH-1:0] pkt_fifo_tdata_out [C_NUM_QUEUES-1:0];
+wire [C_S_AXIS_TUSER_WIDTH-1:0] pkt_fifo_tuser_out [C_NUM_QUEUES-1:0];
+wire [C_S_AXIS_DATA_WIDTH/8-1:0] pkt_fifo_tkeep_out [C_NUM_QUEUES-1:0];
+wire [C_NUM_QUEUES-1:0] pkt_fifo_tlast_out;
 
 // output from parser
-wire [C_S_AXIS_DATA_WIDTH-1:0]		parser_m_axis_tdata [C_NUM_QUEUES-1:0];
-wire [C_S_AXIS_TUSER_WIDTH-1:0]		parser_m_axis_tuser [C_NUM_QUEUES-1:0];
-wire [C_S_AXIS_DATA_WIDTH/8-1:0]	parser_m_axis_tkeep [C_NUM_QUEUES-1:0];
-wire [C_NUM_QUEUES-1:0]				parser_m_axis_tlast;
-wire [C_NUM_QUEUES-1:0]				parser_m_axis_tvalid;
+wire [C_S_AXIS_DATA_WIDTH-1:0] parser_m_axis_tdata [C_NUM_QUEUES-1:0];
+wire [C_S_AXIS_TUSER_WIDTH-1:0] parser_m_axis_tuser [C_NUM_QUEUES-1:0];
+wire [C_S_AXIS_DATA_WIDTH/8-1:0] parser_m_axis_tkeep [C_NUM_QUEUES-1:0];
+wire [C_NUM_QUEUES-1:0] parser_m_axis_tlast;
+wire [C_NUM_QUEUES-1:0] parser_m_axis_tvalid;
 
-wire [C_NUM_QUEUES-1:0]				pkt_fifo_rd_en;
-wire [C_NUM_QUEUES-1:0]				pkt_fifo_nearly_full;
-wire [C_NUM_QUEUES-1:0]				pkt_fifo_empty;
+wire [C_NUM_QUEUES-1:0] pkt_fifo_rd_en;
+wire [C_NUM_QUEUES-1:0] pkt_fifo_nearly_full;
+wire [C_NUM_QUEUES-1:0] pkt_fifo_empty;
 
-assign s_axis_tready_f = !pkt_fifo_nearly_full[0] &&
-							!pkt_fifo_nearly_full[1] &&
-							!pkt_fifo_nearly_full[2] &&
-							!pkt_fifo_nearly_full[3];
+assign s_axis_tready_f = !pkt_fifo_nearly_full[0] && !pkt_fifo_nearly_full[1] &&
+			 !pkt_fifo_nearly_full[2] && !pkt_fifo_nearly_full[3];
 
 /*
 generate 
