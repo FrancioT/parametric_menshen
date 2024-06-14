@@ -68,13 +68,13 @@ wire stg2_phv_out_valid;
 wire [PKT_VEC_WIDTH-1:0] stg3_phv_out;
 wire stg3_phv_out_valid;
 // wire [PKT_VEC_WIDTH-1:0] stg4_phv_out;
-// wire	stg4_phv_out_valid;
+// wire stg4_phv_out_valid;
 
-reg [PKT_VEC_WIDTH-1:0]	stg0_phv_in_d1;
-reg [PKT_VEC_WIDTH-1:0]	stg0_phv_out_d1;
-reg [PKT_VEC_WIDTH-1:0]	stg1_phv_out_d1;
+reg [PKT_VEC_WIDTH-1:0] stg0_phv_in_d1;
+reg [PKT_VEC_WIDTH-1:0] stg0_phv_out_d1;
+reg [PKT_VEC_WIDTH-1:0] stg1_phv_out_d1;
 reg [PKT_VEC_WIDTH-1:0] stg2_phv_out_d1;
-reg [PKT_VEC_WIDTH-1:0]	stg3_phv_out_d1;
+reg [PKT_VEC_WIDTH-1:0] stg3_phv_out_d1;
 
 reg stg0_phv_in_valid_d1;
 reg stg0_phv_out_valid_d1;
@@ -204,18 +204,18 @@ pkt_filter #(
 wire [C_S_AXIS_DATA_WIDTH-1:0] pkt_fifo_tdata_out [C_NUM_QUEUES-1:0];
 wire [C_S_AXIS_TUSER_WIDTH-1:0] pkt_fifo_tuser_out [C_NUM_QUEUES-1:0];
 wire [C_S_AXIS_DATA_WIDTH/8-1:0] pkt_fifo_tkeep_out [C_NUM_QUEUES-1:0];
-wire [C_NUM_QUEUES-1:0] pkt_fifo_tlast_out;
+wire pkt_fifo_tlast_out [C_NUM_QUEUES-1:0];
 
 // output from parser
 wire [C_S_AXIS_DATA_WIDTH-1:0] parser_m_axis_tdata [C_NUM_QUEUES-1:0];
 wire [C_S_AXIS_TUSER_WIDTH-1:0] parser_m_axis_tuser [C_NUM_QUEUES-1:0];
 wire [C_S_AXIS_DATA_WIDTH/8-1:0] parser_m_axis_tkeep [C_NUM_QUEUES-1:0];
-wire [C_NUM_QUEUES-1:0] parser_m_axis_tlast;
-wire [C_NUM_QUEUES-1:0] parser_m_axis_tvalid;
+wire parser_m_axis_tlast [C_NUM_QUEUES-1:0];
+wire parser_m_axis_tvalid [C_NUM_QUEUES-1:0];
 
-wire [C_NUM_QUEUES-1:0] pkt_fifo_rd_en;
-wire [C_NUM_QUEUES-1:0] pkt_fifo_nearly_full;
-wire [C_NUM_QUEUES-1:0] pkt_fifo_empty;
+wire pkt_fifo_rd_en [C_NUM_QUEUES-1:0];
+wire pkt_fifo_nearly_full [C_NUM_QUEUES-1:0];
+wire pkt_fifo_empty [C_NUM_QUEUES-1:0];
 
 assign s_axis_tready_f = !pkt_fifo_nearly_full[0] && !pkt_fifo_nearly_full[1] &&
 			 !pkt_fifo_nearly_full[2] && !pkt_fifo_nearly_full[3];
