@@ -7,66 +7,65 @@ module output_arbiter #(
 	parameter C_NUM_QUEUES_WIDTH=2
 )
 (
-	input									axis_clk,
-	input									aresetn,
+	input						axis_clk,
+	input						aresetn,
 
 	// output
 	output [C_AXIS_DATA_WIDTH-1:0]			m_axis_tdata,
 	output [C_AXIS_DATA_WIDTH/8-1:0]		m_axis_tkeep,
 	output [C_AXIS_TUSER_WIDTH-1:0]			m_axis_tuser,
-	output									m_axis_tvalid,
-	output									m_axis_tlast,
-	input									m_axis_tready,
+	output						m_axis_tvalid,
+	output						m_axis_tlast,
+	input						m_axis_tready,
 
 	// input
 	input [C_AXIS_DATA_WIDTH-1:0]			s_axis_tdata_0,
 	input [C_AXIS_DATA_WIDTH/8-1:0]			s_axis_tkeep_0,
 	input [C_AXIS_TUSER_WIDTH-1:0]			s_axis_tuser_0,
-	input									s_axis_tlast_0,
-	input									s_axis_tvalid_0,
-	output									s_axis_tready_0,
+	input						s_axis_tlast_0,
+	input						s_axis_tvalid_0,
+	output						s_axis_tready_0,
 
 	input [C_AXIS_DATA_WIDTH-1:0]			s_axis_tdata_1,
 	input [C_AXIS_DATA_WIDTH/8-1:0]			s_axis_tkeep_1,
 	input [C_AXIS_TUSER_WIDTH-1:0]			s_axis_tuser_1,
-	input									s_axis_tlast_1,
-	input									s_axis_tvalid_1,
-	output									s_axis_tready_1,
+	input						s_axis_tlast_1,
+	input						s_axis_tvalid_1,
+	output						s_axis_tready_1,
 
 	input [C_AXIS_DATA_WIDTH-1:0]			s_axis_tdata_2,
 	input [C_AXIS_DATA_WIDTH/8-1:0]			s_axis_tkeep_2,
 	input [C_AXIS_TUSER_WIDTH-1:0]			s_axis_tuser_2,
-	input									s_axis_tlast_2,
-	input									s_axis_tvalid_2,
-	output									s_axis_tready_2,
+	input						s_axis_tlast_2,
+	input						s_axis_tvalid_2,
+	output						s_axis_tready_2,
 
 	input [C_AXIS_DATA_WIDTH-1:0]			s_axis_tdata_3,
 	input [C_AXIS_DATA_WIDTH/8-1:0]			s_axis_tkeep_3,
 	input [C_AXIS_TUSER_WIDTH-1:0]			s_axis_tuser_3,
-	input									s_axis_tlast_3,
-	input									s_axis_tvalid_3,
-	output									s_axis_tready_3
+	input						s_axis_tlast_3,
+	input						s_axis_tvalid_3,
+	output						s_axis_tready_3
 );
 
-wire [C_NUM_QUEUES-1:0]					nearly_full;
-wire [C_NUM_QUEUES-1:0]					empty;
-wire [C_AXIS_DATA_WIDTH-1:0]			in_tdata [C_NUM_QUEUES-1:0];
-wire [C_AXIS_DATA_WIDTH/8-1:0]			in_tkeep [C_NUM_QUEUES-1:0];
-wire [C_AXIS_TUSER_WIDTH-1:0]			in_tuser [C_NUM_QUEUES-1:0];
-wire [C_NUM_QUEUES-1:0]					in_tvalid;
-wire [C_NUM_QUEUES-1:0]					in_tlast;
+wire [C_NUM_QUEUES-1:0] nearly_full;
+wire [C_NUM_QUEUES-1:0] empty;
+wire [C_AXIS_DATA_WIDTH-1:0] in_tdata [C_NUM_QUEUES-1:0];
+wire [C_AXIS_DATA_WIDTH/8-1:0] in_tkeep [C_NUM_QUEUES-1:0];
+wire [C_AXIS_TUSER_WIDTH-1:0] in_tuser [C_NUM_QUEUES-1:0];
+wire in_tvalid [C_NUM_QUEUES-1:0];
+wire in_tlast [C_NUM_QUEUES-1:0];
 
-wire [C_AXIS_DATA_WIDTH-1:0]			fifo_out_tdata [C_NUM_QUEUES-1:0];
-wire [C_AXIS_DATA_WIDTH/8-1:0]			fifo_out_tkeep [C_NUM_QUEUES-1:0];
-wire [C_AXIS_TUSER_WIDTH-1:0]			fifo_out_tuser [C_NUM_QUEUES-1:0];
-wire [C_NUM_QUEUES-1:0]					fifo_out_tlast;
+wire [C_AXIS_DATA_WIDTH-1:0] fifo_out_tdata [C_NUM_QUEUES-1:0];
+wire [C_AXIS_DATA_WIDTH/8-1:0] fifo_out_tkeep [C_NUM_QUEUES-1:0];
+wire [C_AXIS_TUSER_WIDTH-1:0] fifo_out_tuser [C_NUM_QUEUES-1:0];
+wire [C_NUM_QUEUES-1:0] fifo_out_tlast;
 
-reg [C_NUM_QUEUES-1:0]					rd_en;
-wire [C_NUM_QUEUES_WIDTH-1:0]			cur_queue_plus1;
-reg [C_NUM_QUEUES_WIDTH-1:0]			cur_queue, cur_queue_next;
+reg [C_NUM_QUEUES-1:0] rd_en;
+wire [C_NUM_QUEUES_WIDTH-1:0] cur_queue_plus1;
+reg [C_NUM_QUEUES_WIDTH-1:0] cur_queue, cur_queue_next;
 
-reg										state, state_next;
-
+reg state, state_next;
 
 
 generate
@@ -128,8 +127,7 @@ assign m_axis_tkeep = fifo_out_tkeep[cur_queue];
 assign m_axis_tlast = fifo_out_tlast[cur_queue];
 assign m_axis_tvalid = ~empty[cur_queue] && m_axis_tready;
 
-localparam	IDLE=0,
-			WR_PKT=1;
+localparam IDLE=0, WR_PKT=1;
 
 always @(*) begin
 

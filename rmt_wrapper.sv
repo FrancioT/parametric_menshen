@@ -216,10 +216,11 @@ logic phv_fifo_empty [C_NUM_QUEUES-1:0];
 logic [(PKT_VEC_WIDTH/2):0] high_phv_out [C_NUM_QUEUES-1:0];
 logic [(PKT_VEC_WIDTH/2):0] low_phv_out [C_NUM_QUEUES-1:0];
 
-assign phv_fifo_out[0] = {high_phv_out[0], low_phv_out[0]};
-assign phv_fifo_out[1] = {high_phv_out[1], low_phv_out[1]};
-assign phv_fifo_out[2] = {high_phv_out[2], low_phv_out[2]};
-assign phv_fifo_out[3] = {high_phv_out[3], low_phv_out[3]};
+generate
+	for (i=0; i<C_NUM_QUEUES; i=i+1) begin
+		assign phv_fifo_out[i] = {high_phv_out[i], low_phv_out[i]};
+	end
+endgenerate
 
 generate 
 	for (i=0; i<C_NUM_QUEUES; i=i+1) begin:
