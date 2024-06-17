@@ -46,12 +46,12 @@ module pkt_filter #(
 );
 
 
-wire [C_S_AXIS_DATA_WIDTH-1:0]	pkt_fifo_tdata;
-wire [C_S_AXIS_DATA_WIDTH/8-1:0]	pkt_fifo_tkeep;
-wire [C_S_AXIS_TUSER_WIDTH-1:0]		pkt_fifo_tuser;
-wire								pkt_fifo_tlast;
-reg								pkt_fifo_rd_en;
-wire	pkt_fifo_empty, pkt_fifo_full;
+wire [C_S_AXIS_DATA_WIDTH-1:0] pkt_fifo_tdata;
+wire [C_S_AXIS_DATA_WIDTH/8-1:0] pkt_fifo_tkeep;
+wire [C_S_AXIS_TUSER_WIDTH-1:0] pkt_fifo_tuser;
+wire pkt_fifo_tlast;
+reg pkt_fifo_rd_en;
+wire pkt_fifo_empty, pkt_fifo_full;
 
 //
 assign s_axis_tready = !pkt_fifo_full;
