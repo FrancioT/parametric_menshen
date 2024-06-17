@@ -48,28 +48,34 @@ module output_arbiter #(
 	output						s_axis_tready_3
 );
 
-wire [C_NUM_QUEUES-1:0] nearly_full;
-wire [C_NUM_QUEUES-1:0] empty;
-wire [C_AXIS_DATA_WIDTH-1:0] in_tdata [C_NUM_QUEUES-1:0];
-wire [C_AXIS_DATA_WIDTH/8-1:0] in_tkeep [C_NUM_QUEUES-1:0];
-wire [C_AXIS_TUSER_WIDTH-1:0] in_tuser [C_NUM_QUEUES-1:0];
-wire in_tvalid [C_NUM_QUEUES-1:0];
-wire in_tlast [C_NUM_QUEUES-1:0];
+logic [C_NUM_QUEUES-1:0] nearly_full;
+logic [C_NUM_QUEUES-1:0] empty;
+logic [C_AXIS_DATA_WIDTH-1:0] in_tdata [C_NUM_QUEUES-1:0];
+logic [C_AXIS_DATA_WIDTH/8-1:0] in_tkeep [C_NUM_QUEUES-1:0];
+logic [C_AXIS_TUSER_WIDTH-1:0] in_tuser [C_NUM_QUEUES-1:0];
+logic in_tvalid [C_NUM_QUEUES-1:0];
+logic in_tlast [C_NUM_QUEUES-1:0];
 
-wire [C_AXIS_DATA_WIDTH-1:0] fifo_out_tdata [C_NUM_QUEUES-1:0];
-wire [C_AXIS_DATA_WIDTH/8-1:0] fifo_out_tkeep [C_NUM_QUEUES-1:0];
-wire [C_AXIS_TUSER_WIDTH-1:0] fifo_out_tuser [C_NUM_QUEUES-1:0];
-wire [C_NUM_QUEUES-1:0] fifo_out_tlast;
+logic [C_AXIS_DATA_WIDTH-1:0] fifo_out_tdata [C_NUM_QUEUES-1:0];
+logic [C_AXIS_DATA_WIDTH/8-1:0] fifo_out_tkeep [C_NUM_QUEUES-1:0];
+logic [C_AXIS_TUSER_WIDTH-1:0] fifo_out_tuser [C_NUM_QUEUES-1:0];
+logic [C_NUM_QUEUES-1:0] fifo_out_tlast;
 
-reg [C_NUM_QUEUES-1:0] rd_en;
-wire [C_NUM_QUEUES_WIDTH-1:0] cur_queue_plus1;
-reg [C_NUM_QUEUES_WIDTH-1:0] cur_queue, cur_queue_next;
+logic [C_NUM_QUEUES-1:0] rd_en;
+logic [C_NUM_QUEUES_WIDTH-1:0] cur_queue_plus1;
+logic [C_NUM_QUEUES_WIDTH-1:0] cur_queue, cur_queue_next;
 
-reg state, state_next;
+typedef enum logic
+{
+	IDLE = 'b 0,
+	WR_PKT = 'b 1,
+} state_type;
+
+state_type state, state_next;
 
 
+genvar i;
 generate
-	genvar i;
 	for (i=0; i<C_NUM_QUEUES; i=i+1) begin:
 		out_arb_queues
 		fallthrough_small_fifo #(
@@ -127,16 +133,15 @@ assign m_axis_tkeep = fifo_out_tkeep[cur_queue];
 assign m_axis_tlast = fifo_out_tlast[cur_queue];
 assign m_axis_tvalid = ~empty[cur_queue] && m_axis_tready;
 
-localparam IDLE=0, WR_PKT=1;
-
-always @(*) begin
-
+always_comb
+begin
 	state_next = state;
 	cur_queue_next = cur_queue;
 	rd_en = 0;
 
 	case (state)
-		IDLE: begin
+		IDLE:
+		begin
 			if (!empty[cur_queue]) begin
 				if (m_axis_tready) begin
 					state_next = WR_PKT;
@@ -147,7 +152,8 @@ always @(*) begin
 				cur_queue_next = cur_queue_plus1;
 			end
 		end
-		WR_PKT: begin
+		WR_PKT:
+		begin
 			if (m_axis_tready & m_axis_tlast) begin
 				state_next = IDLE;
 				rd_en[cur_queue] = 1;
@@ -160,7 +166,8 @@ always @(*) begin
 	endcase
 end
 
-always @(posedge axis_clk) begin
+always_ff @(posedge axis_clk)
+begin
 	if (~aresetn) begin
 		state <= IDLE;
 		cur_queue <= 0;
