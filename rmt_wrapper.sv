@@ -183,6 +183,7 @@ assign s_axis_tready_f = ~|pkt_fifo_nearly_full;
 //                          !pkt_fifo_nearly_full[2] && !pkt_fifo_nearly_full[3];
 
 genvar i;
+// create a fifo interposed between the parser and the data cache
 generate
 	for (i=0; i<C_NUM_QUEUES; i=i+1) begin:
 		sub_pkt_fifo
@@ -222,6 +223,7 @@ generate
 	end
 endgenerate
 
+// create 2 fifos (since each fifo is half the size of the phv) interposed between the phv exiting from the last stage and the phv entering the deparser
 generate 
 	for (i=0; i<C_NUM_QUEUES; i=i+1) begin:
 		sub_phv_fifo_1
@@ -273,7 +275,7 @@ phv_parser
 (
 	.axis_clk		(clk),
 	.aresetn		(aresetn),
-	// input slvae axi stream
+	// input slave axi stream
 	.s_axis_tdata		(s_axis_tdata_f_sv),
 	.s_axis_tuser		(s_axis_tuser_f_sv),
 	.s_axis_tkeep		(s_axis_tkeep_f_sv),
@@ -341,7 +343,7 @@ stage #(
 	.C_S_AXIS_DATA_WIDTH(C_S_AXIS_DATA_WIDTH),
 	.STAGE_ID(0)
 )
-stage0
+first_stage
 (
 	.axis_clk		(clk),
 	.aresetn		(aresetn),
@@ -423,7 +425,7 @@ generate
 		middle_stage
 		stage #(
 			.C_S_AXIS_DATA_WIDTH(C_S_AXIS_DATA_WIDTH),
-			.STAGE_ID(i)
+			.STAGE_ID(i+1)
 		)
 		stage_i
 		(
@@ -467,9 +469,9 @@ endgenerate
 last_stage #(
 	.C_S_AXIS_DATA_WIDTH(512),
 	//.C_S_AXIS_DATA_WIDTH(C_S_AXIS_DATA_WIDTH),
-	.STAGE_ID(NUM_OF_STAGES-1)
+	.STAGE_ID(NUM_OF_STAGES)
 )
-stage4
+final_stage
 (
 	.axis_clk		(clk),
 	.aresetn		(aresetn),
