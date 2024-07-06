@@ -1,0 +1,67 @@
+diff -r ./emit-pkt.cpp ../../../p4c/backends/FPGA-backend/emit-pkt.cpp
+332c332
+< 	int stg_ind[MAX_NUM_STAGES];
+---
+> 	int stg_ind[5];
+337c337
+< 	for (int i=0; i<MAX_NUM_STAGES; i++) {
+---
+> 	for (int i=0; i<5; i++) {
+340c340
+< 	for(auto stg=0; stg<MAX_NUM_STAGES; stg++) {
+---
+> 	for(auto stg=0; stg<5; stg++) {
+diff -r ./emit-pkt.h ../../../p4c/backends/FPGA-backend/emit-pkt.h
+23c23
+< 					struct StageConf stgs[MAX_NUM_STAGES]) : 
+---
+> 					struct StageConf stgs[5]) : 
+27c27
+< 		memcpy(stg_conf, stgs, MAX_NUM_STAGES*sizeof(struct StageConf));
+---
+> 		memcpy(stg_conf, stgs, 5*sizeof(struct StageConf));
+64c64
+< 	struct StageConf stg_conf[MAX_NUM_STAGES];
+---
+> 	struct StageConf stg_conf[5];
+diff -r ./fpga-control.cpp ../../../p4c/backends/FPGA-backend/fpga-control.cpp
+119,120c119,120
+< 		st_stg = MAX_NUM_STAGES-1;
+< 		nxt_st_stg = MAX_NUM_STAGES;
+---
+> 		st_stg = 4;
+> 		nxt_st_stg = 5;
+diff -r ./fpga-control.h ../../../p4c/backends/FPGA-backend/fpga-control.h
+60c60
+< 	struct StageConf stg_conf[MAX_NUM_STAGES];
+---
+> 	struct StageConf stg_conf[5];
+diff -r ./fpga-program.cpp ../../../p4c/backends/FPGA-backend/fpga-program.cpp
+32c32
+< 	auto stg_conf = control->stg_conf; // MAX_NUM_STAGES stages
+---
+> 	auto stg_conf = control->stg_conf; // 5 stages
+38c38
+< 	for (auto i=0; i<MAX_NUM_STAGES; i++) {
+---
+> 	for (auto i=0; i<5; i++) {
+diff -r ./fpga-table.cpp ../../../p4c/backends/FPGA-backend/fpga-table.cpp
+520c520
+< 	 *  every action can span across at-most MAX_NUM_STAGES stages,
+---
+> 	 *  every action can span across at-most 5 stages,
+524,525c524,525
+< 	std::array<std::array<struct LookupRAMConf, 25>, MAX_NUM_STAGES> ram_conf;
+< 	bool modified_stg[MAX_NUM_STAGES];
+---
+> 	std::array<std::array<struct LookupRAMConf, 25>, 5> ram_conf;
+> 	bool modified_stg[5];
+708c708
+< 	for (int i=0; i<MAX_NUM_STAGES; i++) {
+---
+> 	for (int i=0; i<5; i++) {
+725c725
+< 	if (st_stg > MAX_NUM_STAGES-1) {
+---
+> 	if (st_stg > 4) {
+Only in .: tmp.txt
