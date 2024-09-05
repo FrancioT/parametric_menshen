@@ -214,8 +214,8 @@ logic last_stg_phv_out_valid [C_NUM_QUEUES-1:0];
 logic phv_fifo_rd_en [C_NUM_QUEUES-1:0];
 logic phv_fifo_nearly_full [C_NUM_QUEUES-1:0];
 logic phv_fifo_empty [C_NUM_QUEUES-1:0];
-logic [(PKT_VEC_WIDTH/2):0] high_phv_out [C_NUM_QUEUES-1:0];
-logic [(PKT_VEC_WIDTH/2):0] low_phv_out [C_NUM_QUEUES-1:0];
+logic [(PKT_VEC_WIDTH/2)-1:0] high_phv_out [C_NUM_QUEUES-1:0];
+logic [(PKT_VEC_WIDTH/2)-1:0] low_phv_out [C_NUM_QUEUES-1:0];
 
 generate
 	for (i=0; i<C_NUM_QUEUES; i=i+1) begin
