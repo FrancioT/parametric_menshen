@@ -183,7 +183,7 @@ assign s_axis_tready_f = ~|pkt_fifo_nearly_full;
 //                          !pkt_fifo_nearly_full[2] && !pkt_fifo_nearly_full[3];
 
 genvar i;
-// create a fifo interposed between the parser and the data cache
+// create fifos interposed between the parser and the data cache (they are used to cache the payload of the packet)
 generate
 	for (i=0; i<C_NUM_QUEUES; i=i+1) begin:
 		sub_pkt_fifo
@@ -575,6 +575,7 @@ generate
 endgenerate
 
 // output arbiter
+// used in order to choose between all the existing queues, which one should output the packet in this cycle
 output_arbiter #(
 	.C_AXIS_DATA_WIDTH(C_S_AXIS_DATA_WIDTH),
 	.C_AXIS_TUSER_WIDTH(C_S_AXIS_TUSER_WIDTH)
