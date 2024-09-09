@@ -469,7 +469,7 @@ endgenerate
 last_stage #(
 	.C_S_AXIS_DATA_WIDTH(512),
 	//.C_S_AXIS_DATA_WIDTH(C_S_AXIS_DATA_WIDTH),
-	.STAGE_ID(NUM_OF_STAGES)
+	.STAGE_ID(NUM_OF_STAGES-1)
 )
 final_stage
 (
