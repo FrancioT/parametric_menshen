@@ -603,9 +603,10 @@ initial begin
     s_axis_tlast <= 1'b0;
     
     // Check result
-	@(m_axis_tvalid == 1'b1)
-	assert (m_axis_tdata[479:472] == 8'h50) $display ("TEST PASSED");
-	$finish;
+    @(m_axis_tvalid == 1'b1)
+    #(CYCLE/2)
+    assert (m_axis_tdata[479:472] == 8'h50) $display ("TEST PASSED");
+    $finish;
 end
 
 
