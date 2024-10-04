@@ -105,14 +105,16 @@ read_verilog "./extract/key_extract_top.v"
 read_verilog "./lookup/lookup_engine_top.v"
 read_verilog "./lookup/lke_cam_part.v"
 read_verilog "./lookup/lke_ram_part.v"
-###
-read_verilog "./tb/tb_rmt_wrapper.v"
 
-
-update_compile_order -fileset sources_1
+set_property SOURCE_SET sources_1 [get_filesets sim_1]
+add_files -fileset sim_1 -norecurse tb/tb_rmt_wrapper.v
+add_files -fileset sim_1 -norecurse tb/tb_rmt_wrapper_calc.sv
+add_files -fileset sim_1 -norecurse tb/tb_rmt_wrapper_drop.sv
+add_files -fileset sim_1 -norecurse tb/tb_rmt_wrapper_if_else.sv
+set_property top tb_rmt_wrapper_calc [get_filesets sim_1]
+set_property top_lib xil_defaultlib [get_filesets sim_1]
 update_compile_order -fileset sim_1
 
-set_property top ${sim_top} [get_filesets sim_1]
 set_property include_dirs ${proj_dir} [get_filesets sim_1]
 set_property simulator_language Mixed [current_project]
 set_property verilog_define { {SIMULATION=1} } [get_filesets sim_1]
