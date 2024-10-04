@@ -888,7 +888,16 @@ initial begin
     s_axis_tlast <= 1'b0;
     #(4*CYCLE)
     finished_config <= 1'b1;
-    #(10000*CYCLE);
+    repeat(300)
+    begin
+        #(CYCLE);
+        if(m_axis_tvalid == 1'b1)
+        begin
+            $display ("DROP TEST FAILED");
+            $finish(0);
+        end
+    end
+    $display ("DROP TEST PASSED");
     
     $finish(0);
 end

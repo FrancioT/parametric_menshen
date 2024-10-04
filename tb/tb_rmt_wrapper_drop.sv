@@ -242,8 +242,16 @@ initial begin
     #CYCLE
     s_axis_tvalid <= 1'b0;
     s_axis_tlast <= 1'b0;
-    #(10000*CYCLE)
-    $display("Simulation ended with correct output!");
+    repeat(300)
+    begin
+        #(CYCLE);
+        if(m_axis_tvalid == 1'b1)
+        begin
+            $display ("DROP TEST FAILED");
+            $finish(0);
+        end
+    end
+    $display ("DROP TEST PASSED");
     $finish(0);
 end
 
