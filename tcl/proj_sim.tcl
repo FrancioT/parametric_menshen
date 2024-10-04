@@ -111,6 +111,8 @@ add_files -fileset sim_1 -norecurse tb/tb_rmt_wrapper.v
 add_files -fileset sim_1 -norecurse tb/tb_rmt_wrapper_calc.sv
 add_files -fileset sim_1 -norecurse tb/tb_rmt_wrapper_drop.sv
 add_files -fileset sim_1 -norecurse tb/tb_rmt_wrapper_if_else.sv
+add_files -fileset sim_1 -norecurse tb/tb_rmt_wrapper_modules.sv
+add_files -fileset sim_1 -norecurse tb/tb_rmt_wrapper_stages.sv
 set_property top tb_rmt_wrapper_calc [get_filesets sim_1]
 set_property top_lib xil_defaultlib [get_filesets sim_1]
 update_compile_order -fileset sim_1
