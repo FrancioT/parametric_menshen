@@ -18,10 +18,10 @@ module rmt_wrapper #(
 	parameter KEY_LEN = 48*2+32*2+16*2+1,
 	parameter ACT_LEN = 25,
 	parameter KEY_OFF = 6*3+20,
-	parameter C_NUM_QUEUES = 4,
+	parameter C_NUM_QUEUES = 1,
 	parameter C_VLANID_WIDTH = 12,
 	parameter C_FIFO_BIT_WIDTH = 4,
-	parameter NUM_OF_STAGES = 5
+	parameter NUM_OF_STAGES = 16
 )
 (
 	input						clk,		// axis clk
@@ -183,7 +183,7 @@ assign s_axis_tready_f = ~|pkt_fifo_nearly_full;
 //                          !pkt_fifo_nearly_full[2] && !pkt_fifo_nearly_full[3];
 
 genvar i;
-// create fifos interposed between the parser and the data cache (they are used to cache the payload of the packet)
+// create a fifo interposed between the parser and the data cache
 generate
 	for (i=0; i<C_NUM_QUEUES; i=i+1) begin:
 		sub_pkt_fifo
@@ -574,8 +574,8 @@ generate
 	end
 endgenerate
 
+/*
 // output arbiter
-// used in order to choose between all the existing queues, which one should output the packet in this cycle
 output_arbiter #(
 	.C_AXIS_DATA_WIDTH(C_S_AXIS_DATA_WIDTH),
 	.C_AXIS_TUSER_WIDTH(C_S_AXIS_TUSER_WIDTH)
@@ -618,7 +618,13 @@ out_arb (
 	.s_axis_tlast_3		(depar_out_tlast_sv[3]),
 	.s_axis_tvalid_3	(depar_out_tvalid_sv[3]),
 	.s_axis_tready_3	(depar_out_tready[3])
-);
+);*/
+assign m_axis_tdata = depar_out_tdata[0];
+assign m_axis_tkeep = depar_out_tkeep[0];
+assign m_axis_tuser = depar_out_tuser[0];
+assign m_axis_tlast = depar_out_tlast[0];
+assign m_axis_tvalid = depar_out_tvalid[0];
+assign m_axis_tready = depar_out_tready[0];
 
 
 always_ff @(posedge clk) begin
