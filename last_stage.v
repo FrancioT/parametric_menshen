@@ -257,7 +257,9 @@ always @(*) begin
 	phv_out_0_next = phv_out;
 
 	if (phv_out_valid_from_ae) begin
-		phv_out_valid_0_next = 1;
+		if (phv_out[141]) begin
+			phv_out_valid_0_next = 1;
+		end
 	end
 end
 
