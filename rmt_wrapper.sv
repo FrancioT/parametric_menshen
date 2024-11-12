@@ -304,27 +304,6 @@ phv_parser
 	.m_axis_tvalid_0	(parser_m_axis_tvalid[0]),
 	.m_axis_tready_0	(~pkt_fifo_nearly_full[0]),
 
-	.m_axis_tdata_1		(parser_m_axis_tdata[1]),
-	.m_axis_tuser_1		(parser_m_axis_tuser[1]),
-	.m_axis_tkeep_1		(parser_m_axis_tkeep[1]),
-	.m_axis_tlast_1		(parser_m_axis_tlast[1]),
-	.m_axis_tvalid_1	(parser_m_axis_tvalid[1]),
-	.m_axis_tready_1	(~pkt_fifo_nearly_full[1]),
-
-	.m_axis_tdata_2		(parser_m_axis_tdata[2]),
-	.m_axis_tuser_2		(parser_m_axis_tuser[2]),
-	.m_axis_tkeep_2		(parser_m_axis_tkeep[2]),
-	.m_axis_tlast_2		(parser_m_axis_tlast[2]),
-	.m_axis_tvalid_2	(parser_m_axis_tvalid[2]),
-	.m_axis_tready_2	(~pkt_fifo_nearly_full[2]),
-
-	.m_axis_tdata_3		(parser_m_axis_tdata[3]),
-	.m_axis_tuser_3		(parser_m_axis_tuser[3]),
-	.m_axis_tkeep_3		(parser_m_axis_tkeep[3]),
-	.m_axis_tlast_3		(parser_m_axis_tlast[3]),
-	.m_axis_tvalid_3	(parser_m_axis_tvalid[3]),
-	.m_axis_tready_3	(~pkt_fifo_nearly_full[3]),
-
 	// control path
 	.ctrl_s_axis_tdata	(ctrl_s_axis_tdata_sv[0]),
 	.ctrl_s_axis_tuser	(ctrl_s_axis_tuser_sv[0]),
@@ -488,18 +467,6 @@ final_stage
 	.phv_out_0		(last_stg_phv_out[0]),
 	.phv_out_valid_0	(last_stg_phv_out_valid[0]),
 	.phv_fifo_ready_0	(~phv_fifo_nearly_full[0]),
-
-	.phv_out_1		(last_stg_phv_out[1]),
-	.phv_out_valid_1	(last_stg_phv_out_valid[1]),
-	.phv_fifo_ready_1	(~phv_fifo_nearly_full[1]),
-
-	.phv_out_2		(last_stg_phv_out[2]),
-	.phv_out_valid_2	(last_stg_phv_out_valid[2]),
-	.phv_fifo_ready_2	(~phv_fifo_nearly_full[2]),
-
-	.phv_out_3		(last_stg_phv_out[3]),
-	.phv_out_valid_3	(last_stg_phv_out_valid[3]),
-	.phv_fifo_ready_3	(~phv_fifo_nearly_full[3]),
 
 	// control path
 	.c_s_axis_tdata		(ctrl_s_axis_tdata_sv[NUM_OF_STAGES]),
