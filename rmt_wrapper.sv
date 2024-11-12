@@ -18,7 +18,6 @@ module rmt_wrapper #(
 	parameter KEY_LEN = 48*2+32*2+16*2+1,
 	parameter ACT_LEN = 25,
 	parameter KEY_OFF = 6*3+20,
-	parameter C_NUM_QUEUES = 1,
 	parameter C_VLANID_WIDTH = 12,
 	parameter C_FIFO_BIT_WIDTH = 4,
 	parameter NUM_OF_STAGES = 16
@@ -161,110 +160,90 @@ pkt_filter #(
 
 // we will have multiple pkt fifos and phv fifos
 // pkt fifo logics
-logic [C_S_AXIS_DATA_WIDTH-1:0] pkt_fifo_tdata_out [C_NUM_QUEUES-1:0];
-logic [C_S_AXIS_TUSER_WIDTH-1:0] pkt_fifo_tuser_out [C_NUM_QUEUES-1:0];
-logic [(C_S_AXIS_DATA_WIDTH/8)-1:0] pkt_fifo_tkeep_out [C_NUM_QUEUES-1:0];
-logic pkt_fifo_tlast_out [C_NUM_QUEUES-1:0];
+logic [C_S_AXIS_DATA_WIDTH-1:0] pkt_fifo_tdata_out;
+logic [C_S_AXIS_TUSER_WIDTH-1:0] pkt_fifo_tuser_out;
+logic [(C_S_AXIS_DATA_WIDTH/8)-1:0] pkt_fifo_tkeep_out;
+logic pkt_fifo_tlast_out;
 
 // output from parser
-logic [C_S_AXIS_DATA_WIDTH-1:0] parser_m_axis_tdata [C_NUM_QUEUES-1:0];
-logic [C_S_AXIS_TUSER_WIDTH-1:0] parser_m_axis_tuser [C_NUM_QUEUES-1:0];
-logic [(C_S_AXIS_DATA_WIDTH/8)-1:0] parser_m_axis_tkeep [C_NUM_QUEUES-1:0];
-logic parser_m_axis_tlast [C_NUM_QUEUES-1:0];
-logic parser_m_axis_tvalid [C_NUM_QUEUES-1:0];
+logic [C_S_AXIS_DATA_WIDTH-1:0] parser_m_axis_tdata;
+logic [C_S_AXIS_TUSER_WIDTH-1:0] parser_m_axis_tuser;
+logic [(C_S_AXIS_DATA_WIDTH/8)-1:0] parser_m_axis_tkeep;
+logic parser_m_axis_tlast;
+logic parser_m_axis_tvalid;
 
-logic pkt_fifo_rd_en [C_NUM_QUEUES-1:0];
-logic [C_NUM_QUEUES-1:0] pkt_fifo_nearly_full;
-logic pkt_fifo_empty [C_NUM_QUEUES-1:0];
+logic pkt_fifo_rd_en;
+logic pkt_fifo_nearly_full;
+logic pkt_fifo_empty;
 
 assign s_axis_tready_f = ~|pkt_fifo_nearly_full;
 // equivalent to the old:
 // assign s_axis_tready_f = !pkt_fifo_nearly_full[0] && !pkt_fifo_nearly_full[1] &&
 //                          !pkt_fifo_nearly_full[2] && !pkt_fifo_nearly_full[3];
 
-genvar i;
 // create a fifo interposed between the parser and the data cache
-generate
-	for (i=0; i<C_NUM_QUEUES; i=i+1) begin:
-		sub_pkt_fifo
-		fallthrough_small_fifo #(
-			.WIDTH(C_S_AXIS_DATA_WIDTH+C_S_AXIS_TUSER_WIDTH+C_S_AXIS_DATA_WIDTH/8+1),
-			.MAX_DEPTH_BITS(C_FIFO_BIT_WIDTH)
-		)
-		pkt_fifo (
-			.clk			(clk),                         // input logic clk
-  			.reset			(~aresetn),                    // input logic srst
-  			.din			({parser_m_axis_tdata[i], parser_m_axis_tuser[i],
-						  parser_m_axis_tkeep[i], parser_m_axis_tlast[i]}),     // input logic [704 : 0] din
-  			.wr_en			(parser_m_axis_tvalid[i]),     // input logic wr_en
-  			.rd_en			(pkt_fifo_rd_en[i]),           // input logic rd_en
-  			.dout			({pkt_fifo_tdata_out[i], pkt_fifo_tuser_out[i],
-						  pkt_fifo_tkeep_out[i], pkt_fifo_tlast_out[i]}),       // output logic [704 : 0] dout
-			.full			(),
-  			.nearly_full		(pkt_fifo_nearly_full[i]),     // output logic full
-  			.empty			(pkt_fifo_empty[i])            // output logic empty
-		);
-	end
-endgenerate
+fallthrough_small_fifo #(
+	.WIDTH(C_S_AXIS_DATA_WIDTH+C_S_AXIS_TUSER_WIDTH+C_S_AXIS_DATA_WIDTH/8+1),
+	.MAX_DEPTH_BITS(C_FIFO_BIT_WIDTH)
+)
+pkt_fifo (
+	.clk			(clk),                         // input logic clk
+	.reset			(~aresetn),                    // input logic srst
+	.din			({parser_m_axis_tdata, parser_m_axis_tuser,
+				  parser_m_axis_tkeep, parser_m_axis_tlast}),     // input logic [704 : 0] din
+	.wr_en			(parser_m_axis_tvalid),     // input logic wr_en
+	.rd_en			(pkt_fifo_rd_en),           // input logic rd_en
+	.dout			({pkt_fifo_tdata_out, pkt_fifo_tuser_out,
+				  pkt_fifo_tkeep_out, pkt_fifo_tlast_out}),       // output logic [704 : 0] dout
+	.full			(),
+	.nearly_full		(pkt_fifo_nearly_full),     // output logic full
+	.empty			(pkt_fifo_empty)            // output logic empty
+);
 
-logic [PKT_VEC_WIDTH-1:0] last_stg_phv_out [C_NUM_QUEUES-1:0];
-logic [PKT_VEC_WIDTH-1:0] phv_fifo_out [C_NUM_QUEUES-1:0];
-logic last_stg_phv_out_valid [C_NUM_QUEUES-1:0];
+logic [PKT_VEC_WIDTH-1:0] last_stg_phv_out;
+logic [PKT_VEC_WIDTH-1:0] phv_fifo_out;
+logic last_stg_phv_out_valid;
 
-logic phv_fifo_rd_en [C_NUM_QUEUES-1:0];
-logic phv_fifo_nearly_full [C_NUM_QUEUES-1:0];
-logic phv_fifo_empty [C_NUM_QUEUES-1:0];
-logic [(PKT_VEC_WIDTH/2)-1:0] high_phv_out [C_NUM_QUEUES-1:0];
-logic [(PKT_VEC_WIDTH/2)-1:0] low_phv_out [C_NUM_QUEUES-1:0];
+logic phv_fifo_rd_en;
+logic phv_fifo_nearly_full;
+logic phv_fifo_empty;
+logic [(PKT_VEC_WIDTH/2)-1:0] high_phv_out;
+logic [(PKT_VEC_WIDTH/2)-1:0] low_phv_out;
 
-generate
-	for (i=0; i<C_NUM_QUEUES; i=i+1) begin
-		assign phv_fifo_out[i] = {high_phv_out[i], low_phv_out[i]};
-	end
-endgenerate
+assign phv_fifo_out = {high_phv_out, low_phv_out};
 
 // create 2 fifos (since each fifo is half the size of the phv) interposed between the phv exiting from the last stage and the phv entering the deparser
-generate 
-	for (i=0; i<C_NUM_QUEUES; i=i+1) begin:
-		sub_phv_fifo_1
-		fallthrough_small_fifo #(
-			.WIDTH(PKT_VEC_WIDTH/2),
-			.MAX_DEPTH_BITS(6)
-		)
-		phv_fifo_1 (
-			.clk			(clk),
-			.reset			(~aresetn),
-			.din			(last_stg_phv_out[i][(PKT_VEC_WIDTH/2)-1:0]),
-			.wr_en			(last_stg_phv_out_valid[i]),
-			.rd_en			(phv_fifo_rd_en[i]),
-			.dout			(low_phv_out[i]),
-			.full			(),
-			.nearly_full		(phv_fifo_nearly_full[i]),
-			.empty			(phv_fifo_empty[i])
-		);
-	end
-endgenerate
+fallthrough_small_fifo #(
+	.WIDTH(PKT_VEC_WIDTH/2),
+	.MAX_DEPTH_BITS(6)
+)
+phv_fifo_1 (
+	.clk			(clk),
+	.reset			(~aresetn),
+	.din			(last_stg_phv_out[(PKT_VEC_WIDTH/2)-1:0]),
+	.wr_en			(last_stg_phv_out_valid),
+	.rd_en			(phv_fifo_rd_en),
+	.dout			(low_phv_out),
+	.full			(),
+	.nearly_full		(phv_fifo_nearly_full),
+	.empty			(phv_fifo_empty)
+);
 
-generate
-	for (i=0; i<C_NUM_QUEUES; i=i+1) begin:
-		sub_phv_fifo_2
-		fallthrough_small_fifo #(
-			.WIDTH(PKT_VEC_WIDTH/2),
-			.MAX_DEPTH_BITS(6)
-		)
-		phv_fifo_2 (
-			.clk			(clk),
-			.reset			(~aresetn),
-			.din			(last_stg_phv_out[i][PKT_VEC_WIDTH-1:(PKT_VEC_WIDTH/2)]),
-			.wr_en			(last_stg_phv_out_valid[i]),
-			.rd_en			(phv_fifo_rd_en[i]),
-			.dout			(high_phv_out[i]),
-			.full			(),
-			.nearly_full		(),
-			.empty			()
-		);
-	end
-endgenerate
+fallthrough_small_fifo #(
+	.WIDTH(PKT_VEC_WIDTH/2),
+	.MAX_DEPTH_BITS(6)
+)
+phv_fifo_2 (
+	.clk			(clk),
+	.reset			(~aresetn),
+	.din			(last_stg_phv_out[PKT_VEC_WIDTH-1:(PKT_VEC_WIDTH/2)]),
+	.wr_en			(last_stg_phv_out_valid),
+	.rd_en			(phv_fifo_rd_en),
+	.dout			(high_phv_out),
+	.full			(),
+	.nearly_full		(),
+	.empty			()
+);
 
 parser_top #(
 	.C_S_AXIS_DATA_WIDTH(C_S_AXIS_DATA_WIDTH), //for 100g mac exclusively
@@ -297,12 +276,12 @@ phv_parser
 	.stg_ready_in		(stg_ready[0]),
 
 	// output to different pkt fifos
-	.m_axis_tdata_0		(parser_m_axis_tdata[0]),
-	.m_axis_tuser_0		(parser_m_axis_tuser[0]),
-	.m_axis_tkeep_0		(parser_m_axis_tkeep[0]),
-	.m_axis_tlast_0		(parser_m_axis_tlast[0]),
-	.m_axis_tvalid_0	(parser_m_axis_tvalid[0]),
-	.m_axis_tready_0	(~pkt_fifo_nearly_full[0]),
+	.m_axis_tdata_0		(parser_m_axis_tdata),
+	.m_axis_tuser_0		(parser_m_axis_tuser),
+	.m_axis_tkeep_0		(parser_m_axis_tkeep),
+	.m_axis_tlast_0		(parser_m_axis_tlast),
+	.m_axis_tvalid_0	(parser_m_axis_tvalid),
+	.m_axis_tready_0	(~pkt_fifo_nearly_full),
 
 	// control path
 	.ctrl_s_axis_tdata	(ctrl_s_axis_tdata_sv[0]),
@@ -358,7 +337,7 @@ first_stage
 	.c_m_axis_tvalid	(ctrl_s_axis_tvalid[2])
 );
 
-
+genvar i;
 generate
 	for (i=0; i<NUM_OF_STAGES+2; i=i+1) begin
 		always_ff @(posedge clk) begin
@@ -464,9 +443,9 @@ final_stage
 	// back-pressure signals
 	.stage_ready_out	(stg_ready[NUM_OF_STAGES-1]),
 	// output
-	.phv_out_0		(last_stg_phv_out[0]),
-	.phv_out_valid_0	(last_stg_phv_out_valid[0]),
-	.phv_fifo_ready_0	(~phv_fifo_nearly_full[0]),
+	.phv_out_0		(last_stg_phv_out),
+	.phv_out_valid_0	(last_stg_phv_out_valid),
+	.phv_fifo_ready_0	(~phv_fifo_nearly_full),
 
 	// control path
 	.c_s_axis_tdata		(ctrl_s_axis_tdata_sv[NUM_OF_STAGES]),
@@ -482,7 +461,7 @@ final_stage
 	.c_m_axis_tvalid	(ctrl_s_axis_tvalid[NUM_OF_STAGES+1])
 );
 
-
+/*
 logic [C_S_AXIS_DATA_WIDTH-1:0] depar_out_tdata [C_NUM_QUEUES-1:0];
 logic [(C_S_AXIS_DATA_WIDTH/8)-1:0] depar_out_tkeep [C_NUM_QUEUES-1:0];
 logic [C_S_AXIS_TUSER_WIDTH-1:0] depar_out_tuser [C_NUM_QUEUES-1:0];
@@ -495,6 +474,7 @@ logic [(C_S_AXIS_DATA_WIDTH/8)-1:0] depar_out_tkeep_sv [C_NUM_QUEUES-1:0];
 logic [C_S_AXIS_TUSER_WIDTH-1:0] depar_out_tuser_sv [C_NUM_QUEUES-1:0];
 logic depar_out_tvalid_sv [C_NUM_QUEUES-1:0];
 logic depar_out_tlast_sv [C_NUM_QUEUES-1:0];
+
 
 // multiple deparser + output arbiter
 generate
@@ -541,7 +521,7 @@ generate
 	end
 endgenerate
 
-/*
+
 // output arbiter
 output_arbiter #(
 	.C_AXIS_DATA_WIDTH(C_S_AXIS_DATA_WIDTH),
@@ -586,12 +566,44 @@ out_arb (
 	.s_axis_tvalid_3	(depar_out_tvalid_sv[3]),
 	.s_axis_tready_3	(depar_out_tready[3])
 );*/
-assign m_axis_tdata = depar_out_tdata[0];
-assign m_axis_tkeep = depar_out_tkeep[0];
-assign m_axis_tuser = depar_out_tuser[0];
-assign m_axis_tlast = depar_out_tlast[0];
-assign m_axis_tvalid = depar_out_tvalid[0];
-assign m_axis_tready = depar_out_tready[0];
+deparser_top #(
+	.C_AXIS_DATA_WIDTH(C_S_AXIS_DATA_WIDTH),
+	.C_AXIS_TUSER_WIDTH(C_S_AXIS_TUSER_WIDTH),
+	.C_PKT_VEC_WIDTH(),
+	.DEPARSER_MOD_ID()
+)
+phv_deparser (
+	.axis_clk		(clk),
+	.aresetn		(aresetn),
+
+	//data plane
+	.pkt_fifo_tdata		(pkt_fifo_tdata_out),
+	.pkt_fifo_tkeep		(pkt_fifo_tkeep_out),
+	.pkt_fifo_tuser		(pkt_fifo_tuser_out),
+	.pkt_fifo_tlast		(pkt_fifo_tlast_out),
+	.pkt_fifo_empty		(pkt_fifo_empty),
+	// output from STAGE
+	.pkt_fifo_rd_en		(pkt_fifo_rd_en),
+
+	.phv_fifo_out		(phv_fifo_out),
+	.phv_fifo_empty		(phv_fifo_empty),
+	.phv_fifo_rd_en		(phv_fifo_rd_en),
+	// output
+	.depar_out_tdata	(m_axis_tdata),
+	.depar_out_tkeep	(m_axis_tkeep),
+	.depar_out_tuser	(m_axis_tuser),
+	.depar_out_tvalid	(m_axis_tvalid),
+	.depar_out_tlast	(m_axis_tlast),
+	// input
+	.depar_out_tready	(m_axis_tready),
+
+	//control path
+	.ctrl_s_axis_tdata	(ctrl_s_axis_tdata_sv[NUM_OF_STAGES+1]),
+	.ctrl_s_axis_tuser	(ctrl_s_axis_tuser_sv[NUM_OF_STAGES+1]),
+	.ctrl_s_axis_tkeep	(ctrl_s_axis_tkeep_sv[NUM_OF_STAGES+1]),
+	.ctrl_s_axis_tvalid	(ctrl_s_axis_tvalid_sv[NUM_OF_STAGES+1]),
+	.ctrl_s_axis_tlast	(ctrl_s_axis_tlast_sv[NUM_OF_STAGES+1])
+);
 
 
 always_ff @(posedge clk) begin
@@ -627,6 +639,7 @@ always_ff @(posedge clk) begin
 	end
 end
 
+/*
 // delay deparser out
 always_ff @(posedge clk) begin
 	if (~aresetn) begin
@@ -647,6 +660,6 @@ always_ff @(posedge clk) begin
 			depar_out_tlast_sv[idx] <= depar_out_tlast[idx];
 		end
 	end
-end
+end*/
 
 endmodule

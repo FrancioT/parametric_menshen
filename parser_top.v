@@ -109,7 +109,7 @@ always @(*) begin
 	parser_valid_next = 0;
 
 	if (parser_valid_w) begin
-		pkt_hdr_vec_next = {pkt_hdr_vec_w[PKT_HDR_LEN-1:145], 0, pkt_hdr_vec_w[0+:141]};
+		pkt_hdr_vec_next = {pkt_hdr_vec_w[PKT_HDR_LEN-1:145], 4'b0000, pkt_hdr_vec_w[0+:141]};
 		parser_valid_next = 1;
 	end
 end

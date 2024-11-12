@@ -9,7 +9,7 @@ module last_stage #(
     parameter KEY_LEN = 48*2+32*2+16*2+1,
     parameter ACT_LEN = 25,
     parameter KEY_OFF = 6*3+20,
-	parameter C_NUM_QUEUES = 4,
+	parameter C_NUM_QUEUES = 1,
 	parameter C_VLANID_WIDTH = 12
 )
 (
