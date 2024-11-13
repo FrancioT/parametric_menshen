@@ -3,6 +3,7 @@
 
 run_sim:
 	vivado -mode batch -source tcl/proj_sim.tcl
+	patch ../xilinx_cam/cam_rtl.vhd < cam_rtl.patch
 run_pktgen:
 	vivado -mode batch -source tcl/proj_pkt_gen.tcl
 

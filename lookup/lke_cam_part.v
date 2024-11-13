@@ -92,7 +92,7 @@ always @(posedge clk or negedge rst_n) begin
                 if (key_valid == 1'b1) begin
 					// ready_out <= 1'b0;
                     phv_reg <= phv_in;
-                    lookup_state <= WAIT1_S;
+                    lookup_state <= TRANS_S;
                 end
                 else begin
 					phv_out_valid <= 0;
@@ -100,6 +100,10 @@ always @(posedge clk or negedge rst_n) begin
 					// ready_out <= 1'b1;
                     lookup_state <= IDLE_S;
                 end
+            end
+            
+            TRANS_S: begin
+                lookup_state <= WAIT1_S;
             end
 
             WAIT1_S: begin

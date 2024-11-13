@@ -1,0 +1,143 @@
+@@ -110,6 +110,51 @@
+ LIBRARY IEEE;
+ USE IEEE.STD_LOGIC_1164.ALL;
+ 
++ENTITY RisingEdge_DFlipFlopVect IS 
++   GENERIC (
++      DATA_WIDTH             :     INTEGER := 8
++   );
++   PORT (
++      Clk  : IN  STD_LOGIC := '0';
++      D    : IN  STD_LOGIC_VECTOR(DATA_WIDTH-1 DOWNTO 0)
++                 := (OTHERS => '0');
++      Q    : OUT STD_LOGIC_VECTOR(DATA_WIDTH-1 DOWNTO 0)
++                 := (OTHERS => '0')
++   );
++END RisingEdge_DFlipFlopVect;
++ARCHITECTURE Behavioral OF RisingEdge_DFlipFlopVect IS  
++BEGIN  
++ PROCESS(Clk)
++ BEGIN 
++    IF(rising_edge(Clk)) THEN
++       Q <= D; 
++    END IF;
++ END PROCESS;
++END Behavioral;
++
++LIBRARY IEEE;
++USE IEEE.STD_LOGIC_1164.ALL;
++
++ENTITY RisingEdge_DFlipFlop IS
++   PORT (
++      Clk  : IN  STD_LOGIC := '0';
++      D    : IN  STD_LOGIC := '0';
++      Q    : OUT STD_LOGIC := '0'
++   );
++END RisingEdge_DFlipFlop;
++ARCHITECTURE Behavioral OF RisingEdge_DFlipFlop IS  
++BEGIN  
++ PROCESS(Clk)
++ BEGIN 
++    IF(rising_edge(Clk)) THEN
++       Q <= D; 
++    END IF;
++ END PROCESS;
++END Behavioral;
++
++LIBRARY IEEE;
++USE IEEE.STD_LOGIC_1164.ALL;
++
+ LIBRARY cam;
+ USE cam.cam_pkg.ALL;
+ 
+@@ -459,6 +504,15 @@
+                             := (OTHERS => '0');
+   SIGNAL a_multiple_match : STD_LOGIC := '0';
+   SIGNAL a_single_match   : STD_LOGIC := '0';
++  
++  --signals output from pipeline's inter-stage register
++  SIGNAL rw_dec_clr_ff    : STD_LOGIC := '0';
++  SIGNAL matches_ff       : STD_LOGIC_VECTOR(C_DEPTH-1 DOWNTO 0) 
++                            := (OTHERS => '0');
++  SIGNAL wr_addr_ff       : STD_LOGIC_VECTOR(C_WR_ADDR_INT_WIDTH-1 DOWNTO 0)
++                            := (OTHERS => '0');
++  SIGNAL busy_ff          : STD_LOGIC := '0';
++  SIGNAL read_warning_ff  : STD_LOGIC := '0';
+ 
+   -------internal signals, not connected to ports  ----------------------------
+   SIGNAL wr_addr_ilog     : STD_LOGIC_VECTOR(C_WR_ADDR_INT_WIDTH-1 DOWNTO 0)
+@@ -795,6 +849,35 @@
+   --  All logic is log2 based, and returns any variant of the match flags,
+   --  as well as binary encode, one hot, or many hot addresses.
+   -----------------------------------------------------------------------------
++  -- inter-stage registers
++  is_reg_0 : ENTITY WORK.RisingEdge_DFlipFlop
++    PORT MAP (
++      -- Inputs
++      Clk                     => clk_i,
++      D                       => rw_dec_clr_i,
++      -- Outputs
++      Q                       => rw_dec_clr_ff);
++  
++  is_reg_1 : ENTITY WORK.RisingEdge_DFlipFlopVect
++    GENERIC MAP(
++      DATA_WIDTH              => C_DEPTH)
++    PORT MAP (
++      -- Inputs
++      Clk                     => clk_i,
++      D                       => matches,
++      -- Outputs
++      Q                       => matches_ff);
++  
++  is_reg_2 : ENTITY WORK.RisingEdge_DFlipFlopVect
++    GENERIC MAP(
++      DATA_WIDTH              => C_WR_ADDR_INT_WIDTH)
++    PORT MAP (
++      -- Inputs
++      Clk                     => clk_i,
++      D                       => wr_addr_ilog,
++      -- Outputs
++      Q                       => wr_addr_ff);
++  
+   mlog : ENTITY cam.cam_match_enc
+     GENERIC MAP(
+       C_ADDR_TYPE             => C_ADDR_TYPE,
+@@ -811,9 +894,9 @@
+       --Inputs
+       CLK                     => clk_i,
+       EN                      => en_i,
+-      RW_DEC_CLR              => rw_dec_clr_i,
+-      MATCHES                 => matches,
+-      WR_ADDR                 => wr_addr_ilog,
++      RW_DEC_CLR              => rw_dec_clr_ff,
++      MATCHES                 => matches_ff,
++      WR_ADDR                 => wr_addr_ff,
+       --Outputs               
+       MATCH                   => a_match,
+       MATCH_ADDR_1H           => a_match_addr_1h,
+@@ -877,7 +960,24 @@
+       RW_DEC_CLR           => rw_dec_clr_i, 
+       WR_COUNT             => wr_count, 
+       WREN                 => wren);
+-
++  
++  -- inter-stage registers
++  is_reg_3 : ENTITY WORK.RisingEdge_DFlipFlop
++    PORT MAP (
++      -- Inputs
++      Clk                     => clk_i,
++      D                       => busy_i,
++      -- Outputs
++      Q                       => busy_ff);
++  
++  is_reg_4 : ENTITY WORK.RisingEdge_DFlipFlop
++    PORT MAP (
++      -- Inputs
++      Clk                     => clk_i,
++      D                       => read_warning_i,
++      -- Outputs
++      Q                       => read_warning_ff);
++  
+   -------------------------------------------------------------------------------
+   -- Registered Outputs (for block memory registered outputs OR binary encoded 
+   -- output)
