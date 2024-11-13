@@ -3,12 +3,13 @@
 module stage #(
     parameter C_S_AXIS_DATA_WIDTH = 512,
     parameter C_S_AXIS_TUSER_WIDTH = 128,
-    parameter STAGE_ID = 0,  // valid: 0-4
+    parameter STAGE_ID = 0,  // valid: 0-32
     parameter PHV_LEN = 48*8+32*8+16*8+256,
     parameter KEY_LEN = 48*2+32*2+16*2+1,
     parameter ACT_LEN = 25,
     parameter KEY_OFF = 6*3+20,
-	parameter C_VLANID_WIDTH = 12
+    parameter C_VLANID_WIDTH = 12,
+    parameter NUM_OF_STAGES = 5
 )
 (
     input									axis_clk,
@@ -210,7 +211,8 @@ lookup_engine_top #(
     .PHV_LEN(),
     .KEY_LEN(KEY_LEN),
     .ACT_LEN(),
-    .LOOKUP_ID()
+    .LOOKUP_ID(),
+    .NUM_OF_STAGES(NUM_OF_STAGES)
 ) lookup_engine(
     .clk(axis_clk),
     .rst_n(aresetn),

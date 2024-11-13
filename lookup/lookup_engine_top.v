@@ -8,7 +8,8 @@ module lookup_engine_top #(
     parameter KEY_LEN = 48*2+32*2+16*2+5,
     parameter ACT_LEN = 625,
     parameter LOOKUP_ID = 2,
-	parameter C_VLANID_WIDTH = 12
+    parameter C_VLANID_WIDTH = 12,
+    parameter NUM_OF_STAGES = 5
 )
 (
     input clk,
@@ -88,7 +89,8 @@ lke_cam_part #(
     .KEY_LEN(KEY_LEN),
     .ACT_LEN(ACT_LEN),
     .LOOKUP_ID(LOOKUP_ID),
-	.C_VLANID_WIDTH(C_VLANID_WIDTH)
+    .C_VLANID_WIDTH(C_VLANID_WIDTH),
+    .NUM_OF_STAGES(NUM_OF_STAGES)
 )
 lke_cam (
 	.clk		(clk),

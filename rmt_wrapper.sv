@@ -341,7 +341,8 @@ phv_parser
 
 stage #(
 	.C_S_AXIS_DATA_WIDTH(C_S_AXIS_DATA_WIDTH),
-	.STAGE_ID(0)
+	.STAGE_ID(0),
+	.NUM_OF_STAGES(NUM_OF_STAGES)
 )
 first_stage
 (
@@ -425,7 +426,8 @@ generate
 		middle_stage
 		stage #(
 			.C_S_AXIS_DATA_WIDTH(C_S_AXIS_DATA_WIDTH),
-			.STAGE_ID(i+1)
+			.STAGE_ID(i+1),
+			.NUM_OF_STAGES(NUM_OF_STAGES)
 		)
 		stage_i
 		(
@@ -469,7 +471,8 @@ endgenerate
 last_stage #(
 	.C_S_AXIS_DATA_WIDTH(512),
 	//.C_S_AXIS_DATA_WIDTH(C_S_AXIS_DATA_WIDTH),
-	.STAGE_ID(NUM_OF_STAGES-1)
+	.STAGE_ID(NUM_OF_STAGES-1),
+	.NUM_OF_STAGES(NUM_OF_STAGES)
 )
 final_stage
 (

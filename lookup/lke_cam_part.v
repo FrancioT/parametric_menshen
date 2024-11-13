@@ -8,7 +8,8 @@ module lke_cam_part #(
     parameter KEY_LEN = 48*2+32*2+16*2+5,
     parameter ACT_LEN = 625,
     parameter LOOKUP_ID = 2,
-	parameter C_VLANID_WIDTH = 12
+    parameter C_VLANID_WIDTH = 12,
+    parameter NUM_OF_STAGES = 5
 )
 (
     input clk,
@@ -366,7 +367,7 @@ generate
             end
         end
 
-		if (STAGE_ID == 4) begin
+		if (STAGE_ID == NUM_OF_STAGES-1) begin
 			// tcam1 for lookup
         	cam_top # ( 
         	    .C_DEPTH			(16),
@@ -634,7 +635,7 @@ generate
 			end
 		end
 
-		if (STAGE_ID == 4) begin
+		if (STAGE_ID == NUM_OF_STAGES-1) begin
 			// tcam1 for lookup
         	cam_top # ( 
         	    .C_DEPTH			(16),
