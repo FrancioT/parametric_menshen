@@ -176,7 +176,7 @@ logic pkt_fifo_rd_en;
 logic pkt_fifo_nearly_full;
 logic pkt_fifo_empty;
 
-assign s_axis_tready_f = ~|pkt_fifo_nearly_full;
+assign s_axis_tready_f = !pkt_fifo_nearly_full;
 // equivalent to the old:
 // assign s_axis_tready_f = !pkt_fifo_nearly_full[0] && !pkt_fifo_nearly_full[1] &&
 //                          !pkt_fifo_nearly_full[2] && !pkt_fifo_nearly_full[3];

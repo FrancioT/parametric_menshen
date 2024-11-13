@@ -127,17 +127,13 @@ end
 always @(posedge clk) begin
 	if (~aresetn) begin
 		sub_parser_pkt_hdr_out_d1 <= 0;
-		sub_parser_pkt_hdr_out_d1 <= 0;
 		sub_parser_pkt_hdr_valid_d1 <= 0;
-		sub_parser_vlan_out_d1 <= 0;
 		sub_parser_vlan_out_d1 <= 0;
 		sub_parser_vlan_out_valid_d1 <= 0;
 	end
 	else begin
 		sub_parser_pkt_hdr_out_d1 <= sub_parser_pkt_hdr_out;
-		sub_parser_pkt_hdr_out_d1 <= sub_parser_pkt_hdr_out;
 		sub_parser_pkt_hdr_valid_d1 <= sub_parser_pkt_hdr_valid;
-		sub_parser_vlan_out_d1 <= sub_parser_vlan_out;
 		sub_parser_vlan_out_d1 <= sub_parser_vlan_out;
 		sub_parser_vlan_out_valid_d1 <= sub_parser_vlan_out_valid;
 	end
