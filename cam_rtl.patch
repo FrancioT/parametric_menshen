@@ -66,6 +66,24 @@
  
    -------internal signals, not connected to ports  ----------------------------
    SIGNAL wr_addr_ilog     : STD_LOGIC_VECTOR(C_WR_ADDR_INT_WIDTH-1 DOWNTO 0)
+@@ -495,7 +549,7 @@
+   din_i <= DIN;
+ 
+   --Busy Flag
+-  BUSY <= busy_i;
++  BUSY <= busy_ff;
+ 
+   --Match flag
+   grm : IF C_REG_OUTPUTS = 1 GENERATE
+@@ -584,7 +638,7 @@
+       READ_WARNING <= read_warning_q;
+     END GENERATE greg;
+     ngreg : IF C_REG_OUTPUTS = 0 GENERATE
+-      READ_WARNING <= read_warning_i;
++      READ_WARNING <= read_warning_ff;
+     END GENERATE ngreg;
+   END GENERATE grw;
+   -- No Read Warning Flag
 @@ -795,6 +849,35 @@
    --  All logic is log2 based, and returns any variant of the match flags,
    --  as well as binary encode, one hot, or many hot addresses.
@@ -141,3 +159,12 @@
    -------------------------------------------------------------------------------
    -- Registered Outputs (for block memory registered outputs OR binary encoded 
    -- output)
+@@ -899,7 +999,7 @@
+         MATCH_D              => match_i,
+         MATCH_ADDR_D         => match_addr_i,
+         MULTIPLE_MATCH_D     => multiple_match_i,
+-        RD_ERR_D             => read_warning_i,
++        RD_ERR_D             => read_warning_ff,
+         SINGLE_MATCH_D       => single_match_i,
+         --Outputs
+         MATCH_Q              => match_q,
