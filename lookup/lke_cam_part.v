@@ -48,6 +48,10 @@ module lke_cam_part #(
 wire [3:0]		match_addr;
 wire			match;
 
+reg               key_valid_ff;
+reg [PHV_LEN-1:0] phv_in_ff;
+reg               ready_in_ff;
+
 reg [PHV_LEN-1:0] phv_reg;
 reg [2:0] lookup_state;
 
@@ -72,6 +76,19 @@ localparam IDLE_S = 3'd0,
 
 assign ready_out = lookup_state!=HALT_S;
 
+always @(posedge clk) begin
+	if (~rst_n) begin
+		key_valid_ff <= 0;
+		phv_in_ff <= 0;
+		ready_in_ff <= 0;
+	end
+	else begin
+		key_valid_ff <= key_valid;
+		phv_in_ff <= phv_in;
+		ready_in_ff <= ready_in;
+	end
+end
+
 always @(posedge clk or negedge rst_n) begin
 
     if (~rst_n) begin
@@ -89,10 +106,10 @@ always @(posedge clk or negedge rst_n) begin
     else begin
         case(lookup_state)
             IDLE_S: begin
-                if (key_valid == 1'b1) begin
+                if (key_valid_ff == 1'b1) begin
 					// ready_out <= 1'b0;
-                    phv_reg <= phv_in;
-                    lookup_state <= TRANS_S;
+                    phv_reg <= phv_in_ff;
+                    lookup_state <= WAIT1_S;
                 end
                 else begin
 					phv_out_valid <= 0;
@@ -101,13 +118,9 @@ always @(posedge clk or negedge rst_n) begin
                     lookup_state <= IDLE_S;
                 end
             end
-            
-            TRANS_S: begin
-                lookup_state <= WAIT1_S;
-            end
 
             WAIT1_S: begin
-				if (ready_in) begin
+				if (ready_in_ff) begin
 					phv_out <= phv_reg;
 					phv_out_valid <= 1'b1;
 
@@ -127,7 +140,7 @@ always @(posedge clk or negedge rst_n) begin
 				end
             end
 			HALT_S: begin
-				if (ready_in) begin
+				if (ready_in_ff) begin
 					phv_out <= phv_reg;
 					phv_out_valid <= 1'b1;
 
