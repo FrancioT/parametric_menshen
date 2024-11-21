@@ -243,10 +243,6 @@ reg [204:0]         cam_entry_reg;
 
 reg [2:0]           c_state;
 
-/****for 256b exclusively*****/
-reg                                 c_m_axis_tvalid_r;
-reg                                 c_m_axis_tlast_r;
-
 
 localparam IDLE_C = 0,
            PARSE_C = 1,
