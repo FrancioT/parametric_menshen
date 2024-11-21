@@ -48,6 +48,7 @@ module lke_cam_part #(
 wire [3:0]		match_addr;
 wire			match;
 
+// input registers
 reg [KEY_LEN-1:0]               extract_key_ff;
 reg                             key_valid_ff;
 reg [PHV_LEN-1:0]               phv_in_ff;
@@ -57,6 +58,17 @@ reg [C_S_AXIS_TUSER_WIDTH-1:0]  c_s_axis_tuser_ff;
 reg [C_S_AXIS_DATA_WIDTH/8-1:0] c_s_axis_tkeep_ff;
 reg                             c_s_axis_tvalid_ff;
 reg                             c_s_axis_tlast_ff;
+// output registers
+reg                             ready_out_ff;
+reg [PHV_LEN-1:0]               phv_out_ff;
+reg                             phv_out_valid_ff;
+reg [3:0]                       match_addr_out_ff;
+reg                             if_match_ff;
+reg [C_S_AXIS_DATA_WIDTH-1:0]   c_m_axis_tdata_ff;
+reg [C_S_AXIS_TUSER_WIDTH-1:0]  c_m_axis_tuser_ff;
+reg [C_S_AXIS_DATA_WIDTH/8-1:0] c_m_axis_tkeep_ff;
+reg                             c_m_axis_tvalid_ff;
+reg                             c_m_axis_tlast_ff;
 
 reg [PHV_LEN-1:0] phv_reg;
 reg [2:0] lookup_state;
@@ -84,6 +96,7 @@ assign ready_out = lookup_state!=HALT_S;
 
 always @(posedge clk) begin
     if (~rst_n) begin
+        // input registers
         extract_key_ff <= 0;
         key_valid_ff <= 0;
         phv_in_ff <= 0;
@@ -93,8 +106,21 @@ always @(posedge clk) begin
         c_s_axis_tkeep_ff <= 0;
         c_s_axis_tvalid_ff <= 0;
         c_s_axis_tlast_ff <= 0;
+        
+        // output registers
+        ready_out_ff <= 0;
+        phv_out_ff <= 0;
+        phv_out_valid_ff <= 0;
+        match_addr_out_ff <= 0;
+        if_match_ff <= 0;
+        c_m_axis_tdata_ff <= 0;
+        c_m_axis_tuser_ff <= 0;
+        c_m_axis_tkeep_ff <= 0;
+        c_m_axis_tvalid_ff <= 0;
+        c_m_axis_tlast_ff <= 0;
     end
     else begin
+        // input registers
         extract_key_ff <= extract_key;
         key_valid_ff <= key_valid;
         phv_in_ff <= phv_in;
@@ -104,6 +130,18 @@ always @(posedge clk) begin
         c_s_axis_tkeep_ff <= c_s_axis_tkeep;
         c_s_axis_tvalid_ff <= c_s_axis_tvalid;
         c_s_axis_tlast_ff <= c_s_axis_tlast;
+        
+        // output registers
+        ready_out_ff <= ready_out;
+        phv_out_ff <= phv_out;
+        phv_out_valid_ff <= phv_out_valid;
+        match_addr_out_ff <= match_addr_out;
+        if_match_ff <= if_match;
+        c_m_axis_tdata_ff <= c_m_axis_tdata;
+        c_m_axis_tuser_ff <= c_m_axis_tuser;
+        c_m_axis_tkeep_ff <= c_m_axis_tkeep;
+        c_m_axis_tvalid_ff <= c_m_axis_tvalid;
+        c_m_axis_tlast_ff <= c_m_axis_tlast;
     end
 end
 
