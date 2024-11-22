@@ -213,7 +213,7 @@ action_engine #(
     //signals output from ALUs
     .phv_out(phv_out),
     .phv_valid_out(phv_out_valid_from_ae),
-    .ready_in(phv_fifo_ready_0&&phv_fifo_ready_1&&phv_fifo_ready_2&&phv_fifo_ready_3),
+    .ready_in(phv_fifo_ready_0),
 	.act_vlan_in			(act_vlan_out_r),
 	.act_vlan_valid_in		(act_vlan_out_valid_r),
 	.act_vlan_ready			(act_vlan_ready),
@@ -234,21 +234,6 @@ action_engine #(
 	.c_m_axis_tvalid(c_m_axis_tvalid),
 	.c_m_axis_tlast(c_m_axis_tlast)
 );
-
-// pkt_hdr_vec_next = {pkt_hdr_vec_w[PKT_HDR_LEN-1:145], p_cur_queue_val, pkt_hdr_vec_w[0+:141]}; 
-// position: [141+:4]
-//
-
-// assign phv_out_0 = phv_out;
-// assign phv_out_1 = phv_out;
-// assign phv_out_2 = phv_out;
-// assign phv_out_3 = phv_out;
-// 
-// 
-// assign phv_out_valid_0 = (phv_out[141]==1?1:0) & phv_out_valid_from_ae;
-// assign phv_out_valid_1 = (phv_out[142]==1?1:0) & phv_out_valid_from_ae;
-// assign phv_out_valid_2 = (phv_out[143]==1?1:0) & phv_out_valid_from_ae;
-// assign phv_out_valid_3 = (phv_out[144]==1?1:0) & phv_out_valid_from_ae;
 
 reg [PHV_LEN-1:0] phv_out_0_next;
 reg phv_out_valid_0_next;

@@ -92,7 +92,7 @@ localparam IDLE_S = 3'd0,
 		   EMPTY1_S = 3'd5,
 		   OUTPUT_S = 3'd6;
 
-assign ready_out = lookup_state!=HALT_S;
+assign ready_out_ff = lookup_state!=HALT_S;
 
 always @(posedge clk) begin
     if (~rst_n) begin
@@ -108,16 +108,16 @@ always @(posedge clk) begin
         c_s_axis_tlast_ff <= 0;
         
         // output registers
-        ready_out_ff <= 0;
-        phv_out_ff <= 0;
-        phv_out_valid_ff <= 0;
-        match_addr_out_ff <= 0;
-        if_match_ff <= 0;
-        c_m_axis_tdata_ff <= 0;
-        c_m_axis_tuser_ff <= 0;
-        c_m_axis_tkeep_ff <= 0;
-        c_m_axis_tvalid_ff <= 0;
-        c_m_axis_tlast_ff <= 0;
+        ready_out <= 0;
+        phv_out <= 0;
+        phv_out_valid <= 0;
+        match_addr_out <= 0;
+        if_match <= 0;
+        c_m_axis_tdata <= 0;
+        c_m_axis_tuser <= 0;
+        c_m_axis_tkeep <= 0;
+        c_m_axis_tvalid <= 0;
+        c_m_axis_tlast <= 0;
     end
     else begin
         // input registers
@@ -132,16 +132,16 @@ always @(posedge clk) begin
         c_s_axis_tlast_ff <= c_s_axis_tlast;
         
         // output registers
-        ready_out_ff <= ready_out;
-        phv_out_ff <= phv_out;
-        phv_out_valid_ff <= phv_out_valid;
-        match_addr_out_ff <= match_addr_out;
-        if_match_ff <= if_match;
-        c_m_axis_tdata_ff <= c_m_axis_tdata;
-        c_m_axis_tuser_ff <= c_m_axis_tuser;
-        c_m_axis_tkeep_ff <= c_m_axis_tkeep;
-        c_m_axis_tvalid_ff <= c_m_axis_tvalid;
-        c_m_axis_tlast_ff <= c_m_axis_tlast;
+        ready_out <= ready_out_ff;
+        phv_out <= phv_out_ff;
+        phv_out_valid <= phv_out_valid_ff;
+        match_addr_out <= match_addr_out_ff;
+        if_match <= if_match_ff;
+        c_m_axis_tdata <= c_m_axis_tdata_ff;
+        c_m_axis_tuser <= c_m_axis_tuser_ff;
+        c_m_axis_tkeep <= c_m_axis_tkeep_ff;
+        c_m_axis_tvalid <= c_m_axis_tvalid_ff;
+        c_m_axis_tlast <= c_m_axis_tlast_ff;
     end
 end
 
@@ -151,10 +151,10 @@ always @(posedge clk or negedge rst_n) begin
         phv_reg <= 0;
         lookup_state <= IDLE_S;
 
-        phv_out <= 0;
-		phv_out_valid <= 0;
-		match_addr_out <= 0;
-		if_match <= 0;
+        phv_out_ff <= 0;
+		phv_out_valid_ff <= 0;
+		match_addr_out_ff <= 0;
+		if_match_ff <= 0;
 
 		// ready_out <= 1'b1;
     end
@@ -168,8 +168,8 @@ always @(posedge clk or negedge rst_n) begin
                     lookup_state <= WAIT1_S;
                 end
                 else begin
-					phv_out_valid <= 0;
-					if_match <= 0;
+					phv_out_valid_ff <= 0;
+					if_match_ff <= 0;
 					// ready_out <= 1'b1;
                     lookup_state <= IDLE_S;
                 end
@@ -177,16 +177,16 @@ always @(posedge clk or negedge rst_n) begin
 
             WAIT1_S: begin
 				if (ready_in_ff) begin
-					phv_out <= phv_reg;
-					phv_out_valid <= 1'b1;
+					phv_out_ff <= phv_reg;
+					phv_out_valid_ff <= 1'b1;
 
 					if(match == 1'b0) begin // CAM miss
-						if_match <= 0;
-						match_addr_out <= 4'hf;
+						if_match_ff <= 0;
+						match_addr_out_ff <= 4'hf;
                 	end
                 	else begin // CAM hit
-						if_match <= 1;
-						match_addr_out <= match_addr;
+						if_match_ff <= 1;
+						match_addr_out_ff <= match_addr;
                 	end
                 	lookup_state <= IDLE_S;
 					// ready_out <= 1'b1;
@@ -197,16 +197,16 @@ always @(posedge clk or negedge rst_n) begin
             end
 			HALT_S: begin
 				if (ready_in_ff) begin
-					phv_out <= phv_reg;
-					phv_out_valid <= 1'b1;
+					phv_out_ff <= phv_reg;
+					phv_out_valid_ff <= 1'b1;
 
 					if(match == 1'b0) begin // CAM miss
-						if_match <= 0;
-						match_addr_out <= 4'hf;
+						if_match_ff <= 0;
+						match_addr_out_ff <= 4'hf;
                 	end
                 	else begin // CAM hit
-						if_match <= 1;
-						match_addr_out <= match_addr;
+						if_match_ff <= 1;
+						match_addr_out_ff <= match_addr;
                 	end
                 	lookup_state <= IDLE_S;
 					// ready_out <= 1'b1;
@@ -337,11 +337,11 @@ generate
             cam_entry_reg <= 0;
             continous_flag <= 0;
 
-            c_m_axis_tdata <= 0;
-            c_m_axis_tuser <= 0;
-            c_m_axis_tkeep <= 0;
-            c_m_axis_tvalid <= 0;
-            c_m_axis_tlast <= 0;
+            c_m_axis_tdata_ff <= 0;
+            c_m_axis_tuser_ff <= 0;
+            c_m_axis_tkeep_ff <= 0;
+            c_m_axis_tvalid_ff <= 0;
+            c_m_axis_tlast_ff <= 0;
 
             c_state <= IDLE_C;
 
@@ -369,11 +369,11 @@ generate
                             act_entry_tmp <= 0;
                             continous_flag <= 0;
 
-                            c_m_axis_tdata <= c_s_axis_tdata_ff;
-                            c_m_axis_tuser <= c_s_axis_tuser_ff;
-                            c_m_axis_tkeep <= c_s_axis_tkeep_ff;
-                            c_m_axis_tvalid <= c_s_axis_tvalid_ff;
-                            c_m_axis_tlast <= c_s_axis_tlast_ff;
+                            c_m_axis_tdata_ff <= c_s_axis_tdata_ff;
+                            c_m_axis_tuser_ff <= c_s_axis_tuser_ff;
+                            c_m_axis_tkeep_ff <= c_s_axis_tkeep_ff;
+                            c_m_axis_tvalid_ff <= c_s_axis_tvalid_ff;
+                            c_m_axis_tlast_ff <= c_s_axis_tlast_ff;
 
                             c_state <= IDLE_C;
                         end
@@ -389,11 +389,11 @@ generate
                         act_entry_tmp <= 0;
                         continous_flag <= 0;
 
-                        c_m_axis_tdata <= 0;
-                        c_m_axis_tuser <= 0;
-                        c_m_axis_tkeep <= 0;
-                        c_m_axis_tvalid <= 0;
-                        c_m_axis_tlast <= 0;
+                        c_m_axis_tdata_ff <= 0;
+                        c_m_axis_tuser_ff <= 0;
+                        c_m_axis_tkeep_ff <= 0;
+                        c_m_axis_tvalid_ff <= 0;
+                        c_m_axis_tlast_ff <= 0;
 
                         c_state <= IDLE_C;
                     end
