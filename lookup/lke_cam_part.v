@@ -20,7 +20,7 @@ module lke_cam_part #(
     input                         key_valid,
 	input 					      phv_valid,
     input [PHV_LEN-1:0]           phv_in,
-	output										ready_out,
+	output reg									ready_out,
 
     // output to the ram part
 	output reg [PHV_LEN-1:0]					phv_out,
@@ -59,7 +59,6 @@ reg [C_S_AXIS_DATA_WIDTH/8-1:0] c_s_axis_tkeep_ff;
 reg                             c_s_axis_tvalid_ff;
 reg                             c_s_axis_tlast_ff;
 // output registers
-reg                             ready_out_ff;
 reg [PHV_LEN-1:0]               phv_out_ff;
 reg                             phv_out_valid_ff;
 reg [3:0]                       match_addr_out_ff;
@@ -92,7 +91,6 @@ localparam IDLE_S = 3'd0,
 		   EMPTY1_S = 3'd5,
 		   OUTPUT_S = 3'd6;
 
-assign ready_out_ff = lookup_state!=HALT_S;
 
 always @(posedge clk) begin
     if (~rst_n) begin
@@ -132,7 +130,7 @@ always @(posedge clk) begin
         c_s_axis_tlast_ff <= c_s_axis_tlast;
         
         // output registers
-        ready_out <= ready_out_ff;
+        ready_out <= lookup_state!=HALT_S;
         phv_out <= phv_out_ff;
         phv_out_valid <= phv_out_valid_ff;
         match_addr_out <= match_addr_out_ff;
