@@ -45,6 +45,10 @@ module lke_cam_part #(
 );
 
 /********intermediate variables declared here********/
+wire [3:0]		match_addr_1;
+wire [3:0]		match_addr_2;
+wire			match_1;
+wire			match_2;
 wire [3:0]		match_addr;
 wire			match;
 
@@ -72,13 +76,15 @@ reg                             c_m_axis_tlast_ff;
 reg [PHV_LEN-1:0] phv_reg;
 reg [2:0] lookup_state;
 
-wire [11:0] vlan_id;
+wire [11:0]        vlan_id;
+wire [KEY_LEN-1:0] extract_key_w;
 
-assign vlan_id = phv_in_ff[140:129];
+assign vlan_id       = phv_in_ff[140:129];
+assign extract_key_w = extract_key_ff;
 
 wire [204:0] dbg_input;
 
-assign dbg_input = {vlan_id[3:0], vlan_id[11:4], extract_key_ff};
+assign dbg_input = {vlan_id[3:0], vlan_id[11:4], extract_key_w};
 
 /********intermediate variables declared here********/
 
@@ -236,7 +242,8 @@ reg  [7:0]          c_index_act;
 reg                 c_wr_en_act;
 reg  [ACT_LEN-1:0]  act_entry_tmp;             
 reg                 continous_flag;
-reg [204:0]         cam_entry_reg;
+reg [104:0]         cam_entry_reg_1;
+reg [100:0]         cam_entry_reg_2;
 
 
 reg [2:0]           c_state;
@@ -332,7 +339,8 @@ generate
             c_wr_en_act <= 0;
 
             act_entry_tmp <= 0;
-            cam_entry_reg <= 0;
+            cam_entry_reg_1 <= 0;
+            cam_entry_reg_2 <= 0;
             continous_flag <= 0;
 
             c_m_axis_tdata_ff <= 0;
@@ -399,7 +407,8 @@ generate
 
                 CAM_TMP_ENTRY: begin
                     if(c_s_axis_tvalid_ff) begin
-                        cam_entry_reg <= c_s_axis_tdata_swapped[511 -: 205];
+                        cam_entry_reg_1 <= c_s_axis_tdata_swapped[511 -: 105];
+                        cam_entry_reg_2 <= c_s_axis_tdata_swapped[406 -: 100];
                         c_wr_en_cam <= 1'b1;
                         if(c_s_axis_tlast_ff) begin
                             c_state <= IDLE_C;
@@ -415,7 +424,8 @@ generate
 
                 SU_CAM_TMP_ENTRY: begin
                     if(c_s_axis_tvalid_ff) begin
-                        cam_entry_reg <= c_s_axis_tdata_swapped[511 -: 205];
+                        cam_entry_reg_1 <= c_s_axis_tdata_swapped[511 -: 105];
+                        cam_entry_reg_2 <= c_s_axis_tdata_swapped[406 -: 100];
                         c_wr_en_cam <= 1'b1;
                         c_index_cam <= c_index_cam + 1'b1;
                         if(c_s_axis_tlast_ff) begin
@@ -432,69 +442,69 @@ generate
             endcase
         end
     end
+    
+    // tcam1 for lookup
+    cam_top # ( 
+        .C_DEPTH			(16),
+        // .C_WIDTH			(256),
+        .C_WIDTH			(105),
+        .C_MEM_INIT			(0)
+        // .C_MEM_INIT_FILE	("./cam_init_file.mif")
+    )
+    cam_0
+    (
+        .CLK				(clk),
+        .CMP_DIN			({vlan_id[3:0], vlan_id[11:4], extract_key_w[192:100]}),
+        //.CMP_DATA_MASK		({4'b1111, extract_mask}),
+        .CMP_DATA_MASK      (),
+	    .BUSY				(),
+        .MATCH				(match_1),
+        .MATCH_ADDR			(match_addr_1[3:0]),
 
-	if (STAGE_ID == NUM_OF_STAGES-1) begin
-		// tcam1 for lookup
-    	cam_top # ( 
-    	    .C_DEPTH			(16),
-    	    // .C_WIDTH			(256),
-    	    .C_WIDTH			(205),
-    	    .C_MEM_INIT			(0)
-    	    // .C_MEM_INIT_FILE	("./cam_init_file.mif")
-    	)
-    	cam_0
-    	(
-    	    .CLK				(clk),
-    	    .CMP_DIN			({vlan_id[3:0], vlan_id[11:4], extract_key_ff}),
-    	    //.CMP_DATA_MASK		({4'b1111, extract_mask}),
-    	    .CMP_DATA_MASK      (),
-			.BUSY				(),
-    	    .MATCH				(match),
-    	    .MATCH_ADDR			(match_addr[3:0]),
+        //.WE				(lookup_din_en),
+        //.WR_ADDR			(lookup_din_addr),
+        //.DATA_MASK		(lookup_din_mask),  
+        //.DIN				(lookup_din),
 
-    	    //.WE				(lookup_din_en),
-    	    //.WR_ADDR			(lookup_din_addr),
-    	    //.DATA_MASK		(lookup_din_mask),  
-    	    //.DIN				(lookup_din),
+        .WE                 (c_wr_en_cam),
+        .WR_ADDR            (c_index_cam[3:0]),
+        .DATA_MASK          (),  //TODO do we need ternary matching?
+        .DIN                (cam_entry_reg_1),
+        .EN					(1'b1)
+    );
+    
+    // tcam1 for lookup
+    cam_top # ( 
+        .C_DEPTH			(16),
+        // .C_WIDTH			(256),
+        .C_WIDTH			(100),
+        .C_MEM_INIT			(0)
+        // .C_MEM_INIT_FILE	("./cam_init_file.mif")
+    )
+    cam_0
+    (
+        .CLK				(clk),
+        .CMP_DIN			(extract_key_w[99:0]),
+        //.CMP_DATA_MASK		({4'b1111, extract_mask}),
+        .CMP_DATA_MASK      (),
+	    .BUSY				(),
+        .MATCH				(match_2),
+        .MATCH_ADDR			(match_addr_2[3:0]),
 
-    	    .WE                 (c_wr_en_cam),
-    	    .WR_ADDR            (c_index_cam[3:0]),
-    	    .DATA_MASK          (),  //TODO do we need ternary matching?
-    	    .DIN                (cam_entry_reg),
-    	    .EN					(1'b1)
-    	);
-	end
-	else begin
-		// tcam1 for lookup
-    	cam_top # ( 
-    	    .C_DEPTH			(16),
-    	    // .C_WIDTH			(256),
-    	    .C_WIDTH			(205),
-    	    .C_MEM_INIT			(0)
-    	    // .C_MEM_INIT_FILE	("./cam_init_file.mif")
-    	)
-    	cam_0
-    	(
-    	    .CLK				(clk),
-    	    .CMP_DIN			({vlan_id[3:0], vlan_id[11:4], extract_key_ff}),
-    	    //.CMP_DATA_MASK		({4'b0000, extract_mask}),
-    	    .CMP_DATA_MASK      (),
-    	    .BUSY				(),
-    	    .MATCH				(match),
-    	    .MATCH_ADDR			(match_addr[3:0]),
+        //.WE				(lookup_din_en),
+        //.WR_ADDR			(lookup_din_addr),
+        //.DATA_MASK		(lookup_din_mask),  
+        //.DIN				(lookup_din),
 
-    	    //.WE				(lookup_din_en),
-    	    //.WR_ADDR			(lookup_din_addr),
-    	    //.DATA_MASK		(lookup_din_mask),  
-    	    //.DIN				(lookup_din),
-
-    	    .WE                 (c_wr_en_cam),
-    	    .WR_ADDR            (c_index_cam[3:0]),
-    	    .DATA_MASK          (),  //TODO do we need ternary matching?
-    	    .DIN                (cam_entry_reg),
-    	    .EN					(1'b1)
-    	);
-	end
+        .WE                 (c_wr_en_cam),
+        .WR_ADDR            (c_index_cam[3:0]),
+        .DATA_MASK          (),  //TODO do we need ternary matching?
+        .DIN                (cam_entry_reg_2),
+        .EN					(1'b1)
+    );
+    
+    assign match = (match_1 && match_2 && (match_addr_1 == match_addr_2))? 1 : 0;
+    assign match_addr = (match_addr_1 == match_addr_2)? match_addr_1 : 4'b0000;
 endgenerate
 
 endmodule
