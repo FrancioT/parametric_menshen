@@ -243,7 +243,7 @@ reg                 c_wr_en_act;
 reg  [ACT_LEN-1:0]  act_entry_tmp;             
 reg                 continous_flag;
 reg [104:0]         cam_entry_reg_1;
-reg [100:0]         cam_entry_reg_2;
+reg [99:0]          cam_entry_reg_2;
 
 
 reg [2:0]           c_state;
@@ -481,7 +481,7 @@ generate
         .C_MEM_INIT			(0)
         // .C_MEM_INIT_FILE	("./cam_init_file.mif")
     )
-    cam_0
+    cam_1
     (
         .CLK				(clk),
         .CMP_DIN			(extract_key_w[99:0]),
@@ -503,8 +503,14 @@ generate
         .EN					(1'b1)
     );
     
-    assign match = (match_1 && match_2 && (match_addr_1 == match_addr_2))? 1 : 0;
-    assign match_addr = (match_addr_1 == match_addr_2)? match_addr_1 : 4'b0000;
+    /* TODO: add some bits to distinguish different configuration entries even if they have the same value
+     * for example, if we have 2 configurations but the first half is equal, we must add some bits (for example 4 bits treated as a counter 
+     * from 1 to 16 for the entries) to distinguish this half of the 2 configurations
+     */
+    //assign match = (match_1 && match_2 && (match_addr_1 == match_addr_2))? 1 : 0;
+    //assign match_addr = (match_addr_1 == match_addr_2)? match_addr_1 : 4'b0000;
+    assign match = (match_1 && match_2)? 1 : 0;
+    assign match_addr = (match_1 && match_2)? match_addr_2 : 4'b0000;
 endgenerate
 
 endmodule
